@@ -1,0 +1,156 @@
+name: 🚀 CI/CD Pipeline
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  test-backend:
+    name: 🧪 Test Backend
+    runs-on: ubuntu-latest
+    
+    services:
+      postgres:
+        image: postgres:13
+        env:
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: corgea_auth
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 5432:5432
+
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: 📦 Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '18'
+        cache: 'npm'
+        cache-dependency-path: Backend/package-lock.json
+    
+    - name: 📥 Install Dependencies
+      working-directory: ./Backend
+      run: npm ci
+    
+    - name: 🧪 Run Tests
+      working-directory: ./Backend
+      env:
+        DB_HOST: localhost
+        DB_PORT: 5432
+        DB_NAME: corgea_auth
+        DB_USER: postgres
+        DB_PASSWORD: postgres
+        JWT_SECRET: test-secret
+        PORT: 4000
+      run: npm test
+
+  test-frontend:
+    name: 🎨 Test Frontend
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: 📦 Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '18'
+        cache: 'npm'
+        cache-dependency-path: frontend/package-lock.json
+    
+    - name: 📥 Install Dependencies
+      working-directory: ./frontend
+      run: npm ci
+    
+    - name: 🏗️ Build Application
+      working-directory: ./frontend
+      run: npm run build
+    
+    - name: 🧪 Run Tests
+      working-directory: ./frontend
+      run: npm test
+
+  security-audit:
+    name: 🔒 Security Audit
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: 📦 Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '18'
+        cache: 'npm'
+    
+    - name: 🔍 Audit Backend Dependencies
+      working-directory: ./Backend
+      run: npm audit --audit-level moderate
+    
+    - name: 🔍 Audit Frontend Dependencies
+      working-directory: ./frontend
+      run: npm audit --audit-level moderate
+
+  code-quality:
+    name: 📊 Code Quality
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: 📦 Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '18'
+        cache: 'npm'
+    
+    - name: 🔍 Lint Backend
+      working-directory: ./Backend
+      run: npm run lint || true
+    
+    - name: 🔍 Lint Frontend
+      working-directory: ./frontend
+      run: npm run lint || true
+
+  build-and-deploy:
+    name: 🚀 Build and Deploy
+    runs-on: ubuntu-latest
+    needs: [test-backend, test-frontend, security-audit, code-quality]
+    if: github.ref == 'refs/heads/main'
+
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: 📦 Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '18'
+        cache: 'npm'
+    
+    - name: 🏗️ Build Backend
+      working-directory: ./Backend
+      run: npm run build
+    
+    - name: 🏗️ Build Frontend
+      working-directory: ./frontend
+      run: npm run build
+    
+    - name: 📦 Create Deployment Package
+      run: |
+        mkdir -p deployment
+        cp -r Backend deployment/
+        cp -r frontend deployment/
+        tar -czf corgea-deployment.tar.gz deployment/
+    
+    - name: 📤 Upload Build Artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: corgea-build
+        path: corgea-deployment.tar.gz
