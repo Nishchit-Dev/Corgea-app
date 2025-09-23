@@ -6,7 +6,7 @@ import { apiService } from '@/lib/api'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { Button } from '@/components/ui/button'
-import { CheckCircle, Loader2, ShieldAlert, XCircle } from 'lucide-react'
+import { CheckCircle, Loader2, ShieldAlert, XCircle, Code, FileText, AlertTriangle } from 'lucide-react'
 import Link from 'next/link'
 
 type ScanJob = {
@@ -153,9 +153,87 @@ export default function ScanJobPage() {
         }
     }
 
+    const severityIcon = (s: Vulnerability['severity']) => {
+        switch (s) {
+            case 'critical':
+                return <XCircle className="h-4 w-4 text-red-600" />
+            case 'high':
+                return <AlertTriangle className="h-4 w-4 text-orange-500" />
+            case 'medium':
+                return <ShieldAlert className="h-4 w-4 text-yellow-500" />
+            case 'low':
+                return <AlertTriangle className="h-4 w-4 text-blue-500" />
+            default:
+                return <ShieldAlert className="h-4 w-4 text-gray-500" />
+        }
+    }
+
+    const renderCodeWithHighlight = (vulnerability: Vulnerability) => {
+        const [snippet, setSnippet] = useState<string | null>(vulnerability.codeSnippet || null)
+
+        useEffect(() => {
+            let cancelled = false
+            const maybeFetch = async () => {
+                if (snippet || !data?.scanJob || vulnerability.codeSnippet) return
+                try {
+                    // We don't know the file path at this layer; the parent maps group by file, so this is safe to skip here.
+                } catch {}
+            }
+            maybeFetch()
+            return () => { cancelled = true }
+        }, [snippet, data?.scanJob, vulnerability.codeSnippet])
+
+        const allLines = (snippet || '').split('\n')
+        const targetLine = vulnerability.lineNumber || null
+        const startLine = targetLine ? Math.max(1, targetLine - 8) : 1
+        const endLine = targetLine ? Math.min(allLines.length, targetLine + 8) : Math.min(allLines.length, 16)
+        const lines = allLines.slice(startLine - 1, endLine)
+
+        return (
+            <div className="mt-3 border rounded-lg overflow-hidden">
+                <div className="text-gray-800 bg-gray-200 px-4 py-2 text-sm font-medium flex items-center gap-2">
+                    <Code className="h-4 w-4" />
+                    Code Snippet
+                    {targetLine && (
+                        <span className="text-xs bg-gray-700 px-2 py-1 rounded">
+                            Line {targetLine}
+                        </span>
+                    )}
+                </div>
+                <div className="text-gray-800 bg-gray-200 font-mono text-sm overflow-x-auto">
+                    {lines.map((line, index) => {
+                        const lineNum = (startLine + index)
+                        const isHighlighted = !!(targetLine && lineNum === targetLine)
+                        
+                        return (
+                            <div
+                                key={index}
+                                className={`flex ${
+                                    isHighlighted 
+                                        ? 'bg-red-900/30 border-l-4 border-red-500' 
+                                        : 'hover:bg-gray-200/50'
+                                }`}
+                            >
+                                <div className="w-12 px-3 py-1 text-xs bg-gray-200 text-gray-800 border-r border-gray-700 select-none">
+                                    {lineNum}
+                                </div>
+                                <div className="flex-1 px-3 py-1 whitespace-pre-wrap">
+                                    {line}
+                                </div>
+                                {isHighlighted && (
+                                    <div className="w-2 bg-red-500"></div>
+                                )}
+                            </div>
+                        )
+                    })}
+                </div>
+            </div>
+        )
+    }
+
     return (
         <div className="min-h-screen bg-gray-50 p-8">
-            <div className="max-w-5xl mx-auto">
+            <div className="max-w-6xl mx-auto">
                 <Card>
                     <CardHeader>
                         <div className="flex items-center justify-between">
@@ -192,50 +270,123 @@ export default function ScanJobPage() {
                         )}
 
                         {data?.scanJob && (
-                            <div className="mb-4 text-sm text-gray-600">
-                                <div>
-                                    Repo: <span className="font-medium text-gray-900">{data.scanJob.repository.fullName}</span>
+                            <div className="mb-6 p-4 bg-white rounded-lg border">
+                                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
+                                    <div>
+                                        <span className="text-gray-500">Repository:</span>
+                                        <div className="font-medium text-gray-900">{data.scanJob.repository.fullName}</div>
+                                    </div>
+                                    <div>
+                                        <span className="text-gray-500">Status:</span>
+                                        <div className="flex items-center gap-2">
+                                            {data.scanJob.status === 'completed' && <CheckCircle className="h-4 w-4 text-green-600" />}
+                                            {data.scanJob.status === 'running' && <Loader2 className="h-4 w-4 animate-spin text-blue-600" />}
+                                            {data.scanJob.status === 'failed' && <XCircle className="h-4 w-4 text-red-600" />}
+                                            <span className="font-medium capitalize">{data.scanJob.status}</span>
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <span className="text-gray-500">Scan Type:</span>
+                                        <div className="font-medium">{data.scanJob.scanType} • {data.scanJob.targetBranch}</div>
+                                    </div>
                                 </div>
-                                <div>
-                                    Status: <span className="font-medium">{data.scanJob.status}</span> • Type: {data.scanJob.scanType} • Branch: {data.scanJob.targetBranch}
-                                </div>
-                                <div>
-                                    Started: {new Date(data.scanJob.startedAt).toLocaleString()} {data.scanJob.completedAt ? `• Completed: ${new Date(data.scanJob.completedAt).toLocaleString()}` : ''}
+                                <div className="mt-3 text-sm text-gray-600">
+                                    <div>Started: {new Date(data.scanJob.startedAt).toLocaleString()}</div>
+                                    {data.scanJob.completedAt && (
+                                        <div>Completed: {new Date(data.scanJob.completedAt).toLocaleString()}</div>
+                                    )}
                                 </div>
                             </div>
                         )}
 
                         {data?.scanJob.status === 'completed' && (
                             <div>
-                                <h3 className="font-semibold mb-3">Results</h3>
+                                <h3 className="text-xl font-semibold mb-4 flex items-center gap-2">
+                                    <FileText className="h-5 w-5" />
+                                    Vulnerability Analysis
+                                </h3>
                                 {grouped.length === 0 ? (
-                                    <div className="text-sm text-gray-500">No vulnerabilities found.</div>
+                                    <div className="text-center py-8 text-gray-500">
+                                        <ShieldAlert className="h-12 w-12 mx-auto mb-4 text-gray-400" />
+                                        <div className="text-lg font-medium">No vulnerabilities found</div>
+                                        <div className="text-sm">Your code appears to be secure!</div>
+                                    </div>
                                 ) : (
-                                    <div className="space-y-4">
+                                    <div className="space-y-6">
                                         {grouped.map(({ file, vulns }) => (
-                                            <div key={file} className="border rounded p-4">
-                                                <div className="flex items-center justify-between mb-2">
-                                                    <div className="font-medium text-gray-900 truncate">{file}</div>
-                                                    <div className="text-xs text-gray-500">{vulns.length} finding(s)</div>
-                                                </div>
-                                                <div className="space-y-3">
-                                                    {vulns.map((v, i) => (
-                                                        <div key={i} className="rounded border p-3">
-                                                            <div className="flex items-center justify-between gap-3">
-                                                                <div className="text-sm font-medium truncate">{v.title}</div>
-                                                                <span className={`text-xs px-2 py-1 rounded ${severityClass(v.severity)}`}>{v.severity}</span>
-                                                            </div>
-                                                            <div className="text-xs text-gray-600 mt-1">{v.category}{v.cweId ? ` • ${v.cweId}` : ''}{v.owaspCategory ? ` • ${v.owaspCategory}` : ''}{v.lineNumber ? ` • line ${v.lineNumber}` : ''}</div>
-                                                            {v.description && (
-                                                                <p className="text-sm text-gray-700 mt-2 whitespace-pre-wrap">{v.description}</p>
-                                                            )}
-                                                            {v.codeSnippet && (
-                                                                <pre className="mt-2 bg-gray-900 text-gray-100 text-xs rounded p-2 overflow-auto"><code>{v.codeSnippet}</code></pre>
-                                                            )}
+                                            <Card key={file} className="overflow-hidden">
+                                                <CardHeader className="bg-gray-50 border-b">
+                                                    <div className="flex items-center justify-between">
+                                                        <div className="flex items-center gap-2">
+                                                            <FileText className="h-5 w-5 text-gray-600" />
+                                                            <CardTitle className="text-lg">{file}</CardTitle>
                                                         </div>
-                                                    ))}
-                                                </div>
-                                            </div>
+                                                        <div className="text-sm text-gray-500">
+                                                            {vulns.length} finding{vulns.length !== 1 ? 's' : ''}
+                                                        </div>
+                                                    </div>
+                                                </CardHeader>
+                                                <CardContent className="p-0">
+                                                    <div className="space-y-4 p-6">
+                                                        {vulns.map((v, i) => (
+                                                            <div key={i} className="border rounded-lg p-4 bg-white">
+                                                                <div className="flex items-start justify-between gap-4 mb-3">
+                                                                    <div className="flex items-start gap-3 flex-1">
+                                                                        {severityIcon(v.severity)}
+                                                                        <div className="flex-1">
+                                                                            <div className="font-medium text-gray-900 mb-1">
+                                                                                {v.title}
+                                                                            </div>
+                                                                            <div className="flex items-center gap-2 text-sm text-gray-600 mb-2">
+                                                                                <span className="px-2 py-1 bg-gray-100 rounded text-xs">
+                                                                                    {v.category}
+                                                                                </span>
+                                                                                {v.cweId && (
+                                                                                    <span className="px-2 py-1 bg-blue-100 text-blue-800 rounded text-xs">
+                                                                                        {v.cweId}
+                                                                                    </span>
+                                                                                )}
+                                                                                {v.owaspCategory && (
+                                                                                    <span className="px-2 py-1 bg-purple-100 text-purple-800 rounded text-xs">
+                                                                                        {v.owaspCategory}
+                                                                                    </span>
+                                                                                )}
+                                                                                {v.lineNumber && (
+                                                                                    <span className="px-2 py-1 bg-gray-100 rounded text-xs">
+                                                                                        Line {v.lineNumber}
+                                                                                    </span>
+                                                                                )}
+                                                                            </div>
+                                                                        </div>
+                                                                    </div>
+                                                                    <span className={`text-xs px-3 py-1 rounded-full font-medium ${severityClass(v.severity)}`}>
+                                                                        {v.severity.toUpperCase()}
+                                                                    </span>
+                                                                </div>
+                                                                
+                                                                {v.description && (
+                                                                    <div className="mb-4">
+                                                                        <p className="text-sm text-gray-700 leading-relaxed">
+                                                                            {v.description}
+                                                                        </p>
+                                                                    </div>
+                                                                )}
+
+                                                                {/* If snippet missing, fetch it from backend using scan id and file path */}
+                                                                {v.codeSnippet ? (
+                                                                    renderCodeWithHighlight(v)
+                                                                ) : (
+                                                                    <CodeFetcher
+                                                                        scanJobId={String(data.scanJob.id)}
+                                                                        filePath={file}
+                                                                        lineNumber={v.lineNumber || undefined}
+                                                                    />
+                                                                )}
+                                                            </div>
+                                                        ))}
+                                                    </div>
+                                                </CardContent>
+                                            </Card>
                                         ))}
                                     </div>
                                 )}
@@ -251,6 +402,75 @@ export default function ScanJobPage() {
                         )}
                     </CardContent>
                 </Card>
+            </div>
+        </div>
+    )
+}
+
+
+function CodeFetcher({ scanJobId, filePath, lineNumber }: { scanJobId: string; filePath: string; lineNumber?: number }) {
+    const [snippet, setSnippet] = useState<string | null>(null)
+    const [error, setError] = useState<string | null>(null)
+
+    useEffect(() => {
+        let cancelled = false
+        const fetchCode = async () => {
+            try {
+                const resp = await apiService.get<{ content: string }>(`/api/github/scan/${scanJobId}/file?path=${encodeURIComponent(filePath)}`)
+                if (cancelled) return
+                setSnippet(resp.content)
+            } catch (err: any) {
+                if (cancelled) return
+                setError(err?.message || 'Failed to load code')
+            }
+        }
+        fetchCode()
+        return () => { cancelled = true }
+    }, [scanJobId, filePath])
+
+    if (error) {
+        return (
+            <div className="mt-3 text-xs text-red-600">{error}</div>
+        )
+    }
+
+    if (!snippet) {
+        return (
+            <div className="mt-3 flex items-center gap-2 text-sm text-gray-600">
+                <Loader2 className="h-4 w-4 animate-spin" />
+                <span>Loading code…</span>
+            </div>
+        )
+    }
+
+    // Compute window around target line
+    const allLines = snippet.split('\n')
+    const target = lineNumber || null
+    const start = target ? Math.max(1, target - 8) : 1
+    const end = target ? Math.min(allLines.length, target + 8) : Math.min(allLines.length, 16)
+    const lines = allLines.slice(start - 1, end)
+
+    return (
+        <div className="mt-3 border rounded-lg overflow-hidden">
+            <div className="text-gray-800 bg-gray-200 px-4 py-2 text-sm font-medium flex items-center gap-2">
+                <Code className="h-4 w-4" />
+                Code Snippet
+                {target && (
+                    <span className="text-xs bg-gray-700 text-white px-2 py-1 rounded">Line {target}</span>
+                )}
+            </div>
+            <div className=" font-mono text-sm overflow-x-auto">
+                {lines.map((line, index) => {
+                    const lineNum = start + index
+                    const isHighlighted = !!(target && lineNum === target)
+                    return (
+                        <div key={index} className={`flex ${isHighlighted ? 'bg-red-900/30 border-l-4 border-red-500' : 'hover:bg-gray-800/50'}`}>
+                            <div className="w-12 px-3 py-1 text-xs text-gray-500 bg-gray-800 border-r border-gray-700 select-none">{lineNum}</div>
+                            <div className="flex-1 px-3 py-1 whitespace-pre-wrap">{line}</div>
+                            {isHighlighted && (<div className="w-2 bg-red-500/40"></div>)}
+                        </div>
+                    )
+                })}
             </div>
         </div>
     )

@@ -265,6 +265,56 @@ router.get('/scan/:scanJobId', authenticateToken, async (req, res) => {
     }
 });
 
+// Get raw file content for a scan's repository (used to show code when snippet is missing)
+router.get('/scan/:scanJobId/file', authenticateToken, async (req, res) => {
+    try {
+        const { scanJobId } = req.params;
+        const { path, sha } = req.query;
+
+        if (!path) {
+            return res.status(400).json({ error: 'File path is required' });
+        }
+
+        const pool = require('../config/database');
+        // Find scan job and repository info
+        const infoQuery = `
+            SELECT sj.target_branch, r.full_name AS repo_full_name, r.name AS repo_name
+            FROM scan_jobs sj
+            JOIN repositories r ON sj.repository_id = r.id
+            WHERE sj.id = $1 AND sj.user_id = $2
+        `;
+        const infoResult = await pool.query(infoQuery, [scanJobId, req.user.id]);
+        if (infoResult.rows.length === 0) {
+            return res.status(404).json({ error: 'Scan job not found' });
+        }
+        const { target_branch, repo_full_name, repo_name } = infoResult.rows[0];
+        const owner_username = (repo_full_name || '').split('/')[0];
+
+        // Get decrypted access token for this user
+        const accessToken = await githubService.getAccessToken(req.user.id);
+
+        // Fetch content from GitHub
+        const fileData = await githubService.getFileContent(
+            accessToken,
+            owner_username,
+            repo_name,
+            String(path),
+            target_branch || 'main',
+            sha ? String(sha) : undefined
+        );
+
+        res.json({
+            path: fileData.path || String(path),
+            content: fileData.content,
+            encoding: fileData.encoding || 'utf-8',
+            sha: fileData.sha || sha || null,
+        });
+    } catch (error) {
+        console.error('Get file content for scan error:', error);
+        res.status(500).json({ error: 'Failed to get file content' });
+    }
+});
+
 router.get('/scans', authenticateToken, async (req, res) => {
     try {
         const { page = 1, limit = 20, status } = req.query;
