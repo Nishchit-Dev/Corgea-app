@@ -9,12 +9,44 @@
 [![PostgreSQL](https://img.shields.io/badge/PostgreSQL-Database-blue?style=flat-square&logo=postgresql)](https://postgresql.org/)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.0-blue?style=flat-square&logo=typescript)](https://typescriptlang.org/)
 [![Tailwind CSS](https://img.shields.io/badge/Tailwind%20CSS-4.0-38B2AC?style=flat-square&logo=tailwind-css)](https://tailwindcss.com/)
+[![Framer Motion](https://img.shields.io/badge/Framer%20Motion-12.23.19-pink?style=flat-square&logo=framer)](https://framer.com/motion/)
+[![GitHub API](https://img.shields.io/badge/GitHub-API-black?style=flat-square&logo=github)](https://docs.github.com/en/rest)
+[![Google Gemini](https://img.shields.io/badge/Google-Gemini%20AI-blue?style=flat-square&logo=google)](https://ai.google.dev/)
 
-**An intelligent code security scanner powered by Google Gemini AI with user authentication and modern UI**
+**An intelligent code security scanner powered by Google Gemini AI with GitHub integration, user authentication, and modern UI**
 
-[🚀 Live Demo](#-live-demo) • [📖 Documentation](#-documentation) • [🛠️ Installation](#-installation) • [🤝 Contributing](#-contributing)
+[🚀 Live Demo](#-live-demo) • [📖 Documentation](#-documentation) • [🛠️ Installation](#-installation) • [🤝 Contributing](#-contributing) • [📄 License](#-license)
 
 </div>
+
+---
+
+## 🛠️ Tech Stack
+
+### **Frontend**
+- **Next.js 15.5.3** - React framework with App Router
+- **React 19** - Latest React with concurrent features
+- **TypeScript 5.0** - Type-safe development
+- **Tailwind CSS 4.0** - Utility-first CSS framework
+- **shadcn/ui** - Beautiful, accessible components
+- **Framer Motion** - Smooth animations and transitions
+- **Axios** - HTTP client for API communication
+
+### **Backend**
+- **Node.js** - JavaScript runtime
+- **Express.js** - Web application framework
+- **PostgreSQL** - Relational database
+- **JWT** - JSON Web Tokens for authentication
+- **bcrypt** - Password hashing
+- **Google Gemini AI** - AI-powered code analysis
+- **GitHub OAuth 2.0** - Secure GitHub integration
+
+### **AI & Security**
+- **Google Gemini 1.5 Flash** - Advanced AI model
+- **Multi-language Support** - 50+ programming languages
+- **Vulnerability Detection** - Real-time security analysis
+- **Code Highlighting** - Precise vulnerability marking
+- **Fix Suggestions** - Actionable recommendations
 
 ---
 
@@ -45,6 +77,14 @@
 - **Business logic flaws** analysis
 - **API security** assessment
 
+### 🔗 **GitHub Integration**
+- **OAuth 2.0 authentication** with GitHub
+- **Repository scanning** for entire codebases
+- **Real-time scan status** with progress tracking
+- **Multi-language support** (JavaScript, TypeScript, Python, Java, C#, etc.)
+- **Detailed vulnerability reports** with code highlighting
+- **Fix suggestions** with actionable recommendations
+
 ---
 
 ## 🏗️ Architecture
@@ -54,20 +94,29 @@ graph TB
     A[Frontend - Next.js] --> B[Backend - Express.js]
     B --> C[PostgreSQL Database]
     B --> D[Google Gemini AI]
+    B --> E[GitHub API]
     
-    A --> E[Authentication Context]
-    A --> F[API Service Layer]
-    A --> G[shadcn/ui Components]
+    A --> F[Authentication Context]
+    A --> G[API Service Layer]
+    A --> H[shadcn/ui Components]
+    A --> I[GitHub Integration]
     
-    B --> H[JWT Middleware]
-    B --> I[Auth Controllers]
-    B --> J[Database Models]
+    B --> J[JWT Middleware]
+    B --> K[Auth Controllers]
+    B --> L[GitHub OAuth]
+    B --> M[Scan Controllers]
     
-    C --> K[Users Table]
-    C --> L[Sessions Table]
+    C --> N[Users Table]
+    C --> O[GitHub Accounts]
+    C --> P[Repositories]
+    C --> Q[Scan Jobs]
+    C --> R[Vulnerabilities]
     
-    D --> M[Code Analysis]
-    D --> N[Vulnerability Detection]
+    D --> S[Code Analysis]
+    D --> T[Vulnerability Detection]
+    
+    E --> U[Repository Access]
+    E --> V[File Content]
 ```
 
 ---
@@ -79,9 +128,32 @@ graph TB
 ### 🌐 **Try it out:**
 1. **Register** a new account
 2. **Login** with your credentials  
-3. **Paste your code** in the editor
-4. **Click "Scan Code"** to analyze
-5. **Review vulnerabilities** and suggested fixes
+3. **Connect GitHub** to access your repositories
+4. **Select a repository** to scan
+5. **Review vulnerabilities** with detailed code highlighting
+6. **Apply suggested fixes** with actionable recommendations
+
+---
+
+## 🔗 GitHub Integration Features
+
+### **Repository Management**
+- **OAuth 2.0 Authentication** - Secure GitHub account connection
+- **Repository Discovery** - Automatically fetch user repositories
+- **Real-time Sync** - Keep repository list up-to-date
+- **Search & Filter** - Find repositories quickly
+
+### **Advanced Scanning**
+- **Multi-file Analysis** - Scan entire codebases
+- **Language Detection** - Support for 50+ programming languages
+- **Context-aware Scanning** - File-specific vulnerability detection
+- **Progress Tracking** - Real-time scan status updates
+
+### **Detailed Reporting**
+- **Code Highlighting** - Precise line-by-line vulnerability marking
+- **Severity Classification** - Critical, High, Medium, Low ratings
+- **Fix Suggestions** - Actionable recommendations with code examples
+- **Scan History** - Track all previous scans and results
 
 ---
 
@@ -198,6 +270,18 @@ app.post("/purchase", (req, res) => {
 |--------|----------|-------------|---------------|
 | `POST` | `/scan` | Analyze code for vulnerabilities | ✅ |
 
+### **GitHub Integration Endpoints**
+
+| Method | Endpoint | Description | Auth Required |
+|--------|----------|-------------|---------------|
+| `GET` | `/api/github/account` | Get GitHub account info | ✅ |
+| `POST` | `/api/github/callback` | Handle OAuth callback | ✅ |
+| `GET` | `/api/github/repositories` | List user repositories | ✅ |
+| `POST` | `/api/github/repositories/sync` | Sync repositories | ✅ |
+| `POST` | `/api/github/scan` | Start repository scan | ✅ |
+| `GET` | `/api/github/scans` | Get scan history | ✅ |
+| `GET` | `/api/github/scan/:id` | Get scan results | ✅ |
+
 ### **Example API Usage**
 ```javascript
 // Register user
@@ -236,13 +320,19 @@ AISecure/
 │   ├── 📁 config/             # Database configuration
 │   ├── 📁 controllers/        # Route controllers
 │   ├── 📁 middleware/         # Authentication middleware
-│   ├── 📁 routes/             # API routes
+│   ├── 📁 routes/             # API routes (auth, github)
+│   ├── 📁 services/           # GitHub service, repository scanner
+│   ├── 📁 database/           # Database schemas
 │   ├── 📁 scripts/            # Database setup scripts
 │   └── 📄 index.js            # Server entry point
-├── 📁 frontend/               # Next.js React application
+├── 📁 Frontend/               # Next.js React application
 │   ├── 📁 src/
 │   │   ├── 📁 app/            # Next.js app directory
+│   │   │   ├── 📁 github/     # GitHub integration pages
+│   │   │   └── 📁 api/        # API routes
 │   │   ├── 📁 components/     # React components
+│   │   │   ├── 📁 layout/     # Header, Footer, Layout
+│   │   │   └── 📁 github/    # GitHub-specific components
 │   │   ├── 📁 contexts/       # React contexts
 │   │   └── 📁 lib/            # Utility functions
 │   └── 📄 package.json
@@ -275,6 +365,21 @@ const dbConfig = {
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
 const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
 ```
+
+### **GitHub OAuth Configuration**
+```javascript
+// Backend/.env
+GITHUB_CLIENT_ID=your_github_client_id
+GITHUB_CLIENT_SECRET=your_github_client_secret
+GITHUB_REDIRECT_URI=http://localhost:3000/api/github/callback
+ENCRYPTION_KEY=your_32_character_encryption_key_here
+```
+
+**GitHub App Setup:**
+1. Go to [GitHub Developer Settings](https://github.com/settings/developers)
+2. Create a new OAuth App
+3. Set Authorization callback URL to: `http://localhost:3000/api/github/callback`
+4. Copy Client ID and Client Secret to your `.env` file
 
 ---
 
