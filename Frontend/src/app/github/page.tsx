@@ -102,6 +102,17 @@ function GitHubPageContent() {
         checkGitHubConnection()
     }, [token])
 
+    // Auto-refresh scan history when connected
+    useEffect(() => {
+        if (!githubConnected) return
+        
+        const interval = setInterval(() => {
+            loadScanHistory()
+        }, 5000) // Refresh every 5 seconds
+        
+        return () => clearInterval(interval)
+    }, [githubConnected])
+
     const checkGitHubConnection = async () => {
         try {
             setLoading(true)

@@ -136,9 +136,21 @@ class RepositoryScanner {
     async getAllRepositoryFiles(accessToken, username, repoName, branch) {
         const files = [];
         
+        // First, try to get the repository info to check the actual default branch
+        let actualBranch = branch;
+        try {
+            const repoInfo = await githubService.getRepositoryInfo(accessToken, username, repoName);
+            if (repoInfo && repoInfo.default_branch) {
+                actualBranch = repoInfo.default_branch;
+                console.log(`Using actual default branch: ${actualBranch}`);
+            }
+        } catch (error) {
+            console.warn('Could not fetch repository info, using provided branch:', branch);
+        }
+        
         const scanDirectory = async (path = '') => {
             try {
-                const contents = await githubService.getRepositoryContents(accessToken, username, repoName, path, branch);
+                const contents = await githubService.getRepositoryContents(accessToken, username, repoName, path, actualBranch);
                 
                 for (const item of contents) {
                     if (item.type === 'file') {
@@ -160,6 +172,31 @@ class RepositoryScanner {
                 }
             } catch (error) {
                 console.error(`Error scanning directory ${path}:`, error.message);
+                // If main branch fails, try master
+                if (actualBranch === 'main' && error.response?.status === 404) {
+                    try {
+                        console.log('Trying master branch instead...');
+                        const contents = await githubService.getRepositoryContents(accessToken, username, repoName, path, 'master');
+                        for (const item of contents) {
+                            if (item.type === 'file') {
+                                if (item.size <= this.maxFileSize) {
+                                    files.push({
+                                        path: item.path,
+                                        size: item.size,
+                                        sha: item.sha
+                                    });
+                                }
+                            } else if (item.type === 'dir') {
+                                const skipDirs = ['node_modules', '.git', 'dist', 'build', 'coverage', '.next'];
+                                if (!skipDirs.some(dir => item.path.includes(dir))) {
+                                    await scanDirectory(item.path);
+                                }
+                            }
+                        }
+                    } catch (masterError) {
+                        console.error(`Error scanning directory ${path} with master branch:`, masterError.message);
+                    }
+                }
             }
         };
 
@@ -392,14 +429,56 @@ class RepositoryScanner {
 
     async getRepositoryInfo(repositoryId, userId) {
         const query = `
-            SELECT r.*, ga.access_token_hash, ga.username
+            SELECT r.*, ga.access_token_encrypted, ga.username
             FROM repositories r
             JOIN github_accounts ga ON r.github_account_id = ga.id
             WHERE r.id = $1 AND ga.user_id = $2
         `;
         
         const result = await pool.query(query, [repositoryId, userId]);
-        return result.rows[0] || null;
+        if (result.rows.length === 0) return null;
+        
+        const row = result.rows[0];
+        if (!row.access_token_encrypted) {
+            throw new Error('GitHub token not available. Please reconnect your account.');
+        }
+        
+        // Decrypt the access token
+        const crypto = require('crypto');
+        const ENCRYPTION_KEY = process.env.ENCRYPTION_KEY || 'your-32-character-secret-key-here!';
+        const ALGORITHM = 'aes-256-cbc';
+        
+        function decrypt(encryptedText) {
+            const textParts = encryptedText.split(':');
+            const iv = Buffer.from(textParts.shift(), 'hex');
+            const encryptedData = textParts.join(':');
+            
+            // New scheme (matches githubService encrypt): scrypt-derived key + createCipheriv
+            try {
+                const key = crypto.scryptSync(ENCRYPTION_KEY, 'salt', 32);
+                const decipher = crypto.createDecipheriv(ALGORITHM, key, iv);
+                let decrypted = decipher.update(encryptedData, 'hex', 'utf8');
+                decrypted += decipher.final('utf8');
+                return decrypted;
+            } catch (e) {
+                // Backward-compat: legacy createDecipher fallback
+                try {
+                    const legacyDecipher = crypto.createDecipher(ALGORITHM, ENCRYPTION_KEY);
+                    let legacyDecrypted = legacyDecipher.update(encryptedData, 'hex', 'utf8');
+                    legacyDecrypted += legacyDecipher.final('utf8');
+                    return legacyDecrypted;
+                } catch (_) {
+                    throw e;
+                }
+            }
+        }
+        
+        return {
+            ...row,
+            accessToken: decrypt(row.access_token_encrypted),
+            username: row.username,
+            repoName: row.name
+        };
     }
 
     async getScanJobStartTime(scanJobId) {
