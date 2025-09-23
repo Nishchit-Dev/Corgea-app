@@ -55,9 +55,11 @@ router.post('/callback', authenticateToken, async (req, res) => {
         }
 
         // Exchange code for token
+        console.log('GitHub OAuth POST /callback received code. State:', state, 'Redirect URI:', process.env.GITHUB_REDIRECT_URI || 'unset');
         const tokenData = await githubService.exchangeCodeForToken(code);
         
         if (!tokenData.access_token) {
+            console.error('GitHub token response missing access_token:', tokenData);
             return res.status(400).json({ error: 'Failed to get access token' });
         }
 
@@ -160,8 +162,11 @@ router.post('/repositories/sync', authenticateToken, async (req, res) => {
             return res.status(404).json({ error: 'GitHub account not connected' });
         }
 
+        // Get decrypted access token
+        const accessToken = await githubService.getAccessToken(req.user.id);
+
         // Get fresh repositories from GitHub
-        const repositories = await githubService.getUserRepositories(account.access_token_hash);
+        const repositories = await githubService.getUserRepositories(accessToken);
         
         // Store/update repositories in database
         await githubService.storeRepositories(account.id, repositories);

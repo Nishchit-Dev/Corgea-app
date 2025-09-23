@@ -28,7 +28,9 @@ CREATE TABLE IF NOT EXISTS github_accounts (
     username VARCHAR(255) NOT NULL,
     display_name VARCHAR(255),
     avatar_url VARCHAR(500),
-    access_token_hash VARCHAR(500) NOT NULL,
+    access_token_encrypted TEXT NOT NULL, -- Store actual token encrypted
+    access_token_hash VARCHAR(500) NOT NULL, -- Keep hash for verification
+    refresh_token_encrypted TEXT,
     refresh_token_hash VARCHAR(500),
     token_expires_at TIMESTAMP,
     scopes TEXT[], -- ['repo', 'read:user', 'read:org']
@@ -115,6 +117,20 @@ CREATE TABLE IF NOT EXISTS scan_history (
     scan_duration_seconds INTEGER,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
+
+-- Ensure unique constraint for scan history upsert
+DO $$
+BEGIN
+    IF NOT EXISTS (
+        SELECT 1
+        FROM pg_indexes
+        WHERE schemaname = 'public'
+          AND indexname = 'uniq_scan_history_user_repo_date'
+    ) THEN
+        ALTER TABLE scan_history
+        ADD CONSTRAINT uniq_scan_history_user_repo_date UNIQUE (user_id, repository_id, scan_date);
+    END IF;
+END$$;
 
 -- User preferences table
 CREATE TABLE IF NOT EXISTS user_preferences (

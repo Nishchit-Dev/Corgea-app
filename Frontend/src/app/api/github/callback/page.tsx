@@ -29,6 +29,7 @@ export default function GitHubCallbackPage() {
                 const code = searchParams.get('code')
                 const error = searchParams.get('error')
                 const state = searchParams.get('state')
+                const connected = searchParams.get('connected')
 
                 if (error) {
                     setStatus('error')
@@ -37,16 +38,33 @@ export default function GitHubCallbackPage() {
                 }
 
                 if (!code) {
-                    setStatus('error')
-                    setMessage('No authorization code received from GitHub')
-                    return
+                    // Support backend-handled flow: either redirected with connected=1
+                    // or account already exists for this user
+                    if (connected === '1') {
+                        setStatus('success')
+                        setMessage('GitHub account connected successfully!')
+                        setTimeout(() => {
+                            router.push('/github')
+                        }, 1500)
+                        return
+                    }
+                    try {
+                        await apiService.get('/api/github/account')
+                        setStatus('success')
+                        setMessage('GitHub account connected successfully!')
+                        setTimeout(() => {
+                            router.push('/github')
+                        }, 1500)
+                        return
+                    } catch (_) {
+                        setStatus('error')
+                        setMessage('No authorization code received from GitHub')
+                        return
+                    }
                 }
 
                 // Send code to backend for token exchange using authenticated request
-                const response = await apiService.post('/api/github/callback', {
-                    method: 'POST',
-                    body: JSON.stringify({ code, state }),
-                })
+                const response = await apiService.post('/api/github/callback', { code, state })
 
                 if (response && (response as any).message) {
                     setStatus('success')

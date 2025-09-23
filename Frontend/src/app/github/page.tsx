@@ -37,9 +37,36 @@ export default function GitHubPage() {
     );
 }
 
+type GitHubAccount = {
+    id: number;
+    username: string;
+    displayName?: string;
+    avatarUrl?: string;
+    connectedAt: string;
+};
+
+type Repository = {
+    id: number;
+    name: string;
+    fullName: string;
+    description?: string | null;
+    language?: string | null;
+    isPrivate: boolean;
+    defaultBranch?: string;
+    htmlUrl: string;
+    lastUpdated: string;
+};
+
+type ScanStartResponse = {
+    message: string;
+    scanJobId: number;
+    status: string;
+};
+
 function GitHubPageContent() {
     const [githubConnected, setGithubConnected] = useState(false);
-    const [githubAccount, setGithubAccount] = useState<any>(null);
+    const [githubAccount, setGithubAccount] = useState<GitHubAccount | null>(null);
+    const [repositories, setRepositories] = useState<Repository[]>([]);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const { token } = useAuth();
@@ -53,21 +80,37 @@ function GitHubPageContent() {
             setLoading(true);
             setError(null);
             
-            const account = await apiService.get('/api/github/account');
+            const account = await apiService.get<GitHubAccount>('/api/github/account');
             
             setGithubAccount(account);
             setGithubConnected(true);
+            
+            // Fetch repositories when connected
+            await loadRepositories();
         } catch (err: any) {
             if (err.status === 404) {
                 // GitHub account not connected
                 setGithubAccount(null);
                 setGithubConnected(false);
+                setRepositories([]);
             } else {
                 setError('Failed to check GitHub connection');
                 setGithubConnected(false);
             }
         } finally {
             setLoading(false);
+        }
+    };
+
+    const loadRepositories = async () => {
+        try {
+            const response = await apiService.get<{ repositories: Repository[] }>(
+                '/api/github/repositories'
+            );
+            setRepositories(response.repositories || []);
+        } catch (err: any) {
+            console.error('Failed to load repositories:', err);
+            setRepositories([]);
         }
     };
 
@@ -79,7 +122,7 @@ function GitHubPageContent() {
     const handleGitHubDisconnect = async () => {
         try {
             setLoading(true);
-            await apiService.post('/api/github/disconnect', { method: 'POST' });
+            await apiService.post('/api/github/disconnect');
             
             setGithubAccount(null);
             setGithubConnected(false);
@@ -90,14 +133,33 @@ function GitHubPageContent() {
         }
     };
 
-    const handleScanRepository = (repoId: number) => {
-        // TODO: Navigate to scan results or show scan progress
-        console.log('Scanning repository:', repoId);
+    const handleRefreshRepositories = async () => {
+        try {
+            setLoading(true);
+            await apiService.post('/api/github/repositories/sync');
+            await loadRepositories();
+        } catch (err: any) {
+            setError('Failed to refresh repositories');
+        } finally {
+            setLoading(false);
+        }
     };
 
-    const handleRefreshRepositories = () => {
-        // TODO: Refresh repository list
-        console.log('Refreshing repositories...');
+    const handleScanRepository = async (repoId: number) => {
+        try {
+            setLoading(true);
+            const response = await apiService.post<ScanStartResponse>('/api/github/scan', {
+                repositoryId: repoId,
+                scanType: 'full'
+            });
+            
+            // For now, just show success message
+            alert(`Scan started for repository! Job ID: ${response.scanJobId}`);
+        } catch (err: any) {
+            setError('Failed to start scan');
+        } finally {
+            setLoading(false);
+        }
     };
 
     return (
@@ -205,27 +267,80 @@ function GitHubPageContent() {
                         {githubConnected ? (
                             <Card>
                                 <CardHeader>
-                                    <CardTitle>Your Repositories</CardTitle>
-                                    <CardDescription>
-                                        Select a repository to scan for security vulnerabilities
-                                    </CardDescription>
-                                </CardHeader>
-                                <CardContent>
-                                    <div className="text-center py-8">
-                                        <Shield className="h-12 w-12 mx-auto text-gray-400 mb-4" />
-                                        <h3 className="text-lg font-medium text-gray-900 mb-2">
-                                            No Repositories Found
-                                        </h3>
-                                        <p className="text-gray-500 mb-4">
-                                            This is a simplified version. Real repositories will appear here.
-                                        </p>
+                                    <div className="flex items-center justify-between">
+                                        <div>
+                                            <CardTitle>Your Repositories</CardTitle>
+                                            <CardDescription>
+                                                Select a repository to scan for security vulnerabilities
+                                            </CardDescription>
+                                        </div>
                                         <Button 
                                             variant="outline"
                                             onClick={handleRefreshRepositories}
+                                            disabled={loading}
                                         >
-                                            Refresh Repositories
+                                            {loading ? 'Syncing...' : 'Refresh Repositories'}
                                         </Button>
                                     </div>
+                                </CardHeader>
+                                <CardContent>
+                                    {repositories.length === 0 ? (
+                                        <div className="text-center py-8">
+                                            <Shield className="h-12 w-12 mx-auto text-gray-400 mb-4" />
+                                            <h3 className="text-lg font-medium text-gray-900 mb-2">
+                                                No Repositories Found
+                                            </h3>
+                                            <p className="text-gray-500 mb-4">
+                                                Click "Refresh Repositories" to sync your GitHub repos.
+                                            </p>
+                                        </div>
+                                    ) : (
+                                        <div className="space-y-3">
+                                            {repositories.map((repo) => (
+                                                <div key={repo.id} className="border rounded-lg p-4 hover:bg-gray-50">
+                                                    <div className="flex items-center justify-between">
+                                                        <div className="flex-1">
+                                                            <h4 className="font-medium text-gray-900">{repo.name}</h4>
+                                                            <p className="text-sm text-gray-500">{repo.fullName}</p>
+                                                            {repo.description && (
+                                                                <p className="text-sm text-gray-600 mt-1">{repo.description}</p>
+                                                            )}
+                                                            <div className="flex items-center gap-4 mt-2">
+                                                                {repo.language && (
+                                                                    <span className="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded">
+                                                                        {repo.language}
+                                                                    </span>
+                                                                )}
+                                                                <span className="text-xs text-gray-500">
+                                                                    {repo.isPrivate ? 'Private' : 'Public'}
+                                                                </span>
+                                                                <span className="text-xs text-gray-500">
+                                                                    Updated {new Date(repo.lastUpdated).toLocaleDateString()}
+                                                                </span>
+                                                            </div>
+                                                        </div>
+                                                        <div className="flex gap-2">
+                                                            <Button
+                                                                size="sm"
+                                                                onClick={() => handleScanRepository(repo.id)}
+                                                                disabled={loading}
+                                                            >
+                                                                <Shield className="h-4 w-4 mr-1" />
+                                                                Scan
+                                                            </Button>
+                                                            <Button
+                                                                size="sm"
+                                                                variant="outline"
+                                                                onClick={() => window.open(repo.htmlUrl, '_blank')}
+                                                            >
+                                                                <ExternalLink className="h-4 w-4" />
+                                                            </Button>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    )}
                                 </CardContent>
                             </Card>
                         ) : (

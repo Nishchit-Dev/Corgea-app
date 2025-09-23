@@ -2,6 +2,28 @@ const axios = require('axios');
 const crypto = require('crypto');
 const pool = require('../config/database');
 
+// Simple encryption/decryption for tokens
+const ENCRYPTION_KEY = process.env.ENCRYPTION_KEY || 'your-32-character-secret-key-here!';
+const ALGORITHM = 'aes-256-cbc';
+
+function encrypt(text) {
+    const iv = crypto.randomBytes(16);
+    const cipher = crypto.createCipher(ALGORITHM, ENCRYPTION_KEY);
+    let encrypted = cipher.update(text, 'utf8', 'hex');
+    encrypted += cipher.final('hex');
+    return iv.toString('hex') + ':' + encrypted;
+}
+
+function decrypt(encryptedText) {
+    const textParts = encryptedText.split(':');
+    const iv = Buffer.from(textParts.shift(), 'hex');
+    const encryptedData = textParts.join(':');
+    const decipher = crypto.createDecipher(ALGORITHM, ENCRYPTION_KEY);
+    let decrypted = decipher.update(encryptedData, 'hex', 'utf8');
+    decrypted += decipher.final('utf8');
+    return decrypted;
+}
+
 class GitHubService {
     constructor() {
         this.clientId = process.env.GITHUB_CLIENT_ID;
@@ -26,22 +48,31 @@ class GitHubService {
     // Exchange code for access token
     async exchangeCodeForToken(code) {
         try {
-            const response = await axios.post('https://github.com/login/oauth/access_token', {
+            // GitHub recommends x-www-form-urlencoded for this endpoint
+            const params = new URLSearchParams({
                 client_id: this.clientId,
                 client_secret: this.clientSecret,
                 code: code,
                 redirect_uri: this.redirectUri
-            }, {
-                headers: {
-                    'Accept': 'application/json',
-                    'Content-Type': 'application/json'
-                }
             });
+
+            const response = await axios.post(
+                'https://github.com/login/oauth/access_token',
+                params.toString(),
+                {
+                    headers: {
+                        'Accept': 'application/json',
+                        'Content-Type': 'application/x-www-form-urlencoded'
+                    }
+                }
+            );
 
             return response.data;
         } catch (error) {
-            console.error('GitHub token exchange error:', error);
-            throw new Error('Failed to exchange code for token');
+            const status = error.response?.status;
+            const data = error.response?.data;
+            console.error('GitHub token exchange error:', { status, data, message: error.message, redirectUri: this.redirectUri });
+            throw new Error(data?.error_description || 'Failed to get access token');
         }
     }
 
@@ -183,11 +214,13 @@ class GitHubService {
 
             const query = `
                 INSERT INTO github_accounts 
-                (user_id, github_id, username, display_name, avatar_url, access_token_hash, refresh_token_hash, token_expires_at, scopes)
-                VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
+                (user_id, github_id, username, display_name, avatar_url, access_token_encrypted, access_token_hash, refresh_token_encrypted, refresh_token_hash, token_expires_at, scopes)
+                VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)
                 ON CONFLICT (github_id) 
                 DO UPDATE SET 
+                    access_token_encrypted = EXCLUDED.access_token_encrypted,
                     access_token_hash = EXCLUDED.access_token_hash,
+                    refresh_token_encrypted = EXCLUDED.refresh_token_encrypted,
                     refresh_token_hash = EXCLUDED.refresh_token_hash,
                     token_expires_at = EXCLUDED.token_expires_at,
                     updated_at = CURRENT_TIMESTAMP
@@ -203,7 +236,9 @@ class GitHubService {
                 login,
                 name,
                 avatar_url,
+                encrypt(access_token),
                 this.hashToken(access_token),
+                refresh_token ? encrypt(refresh_token) : null,
                 refresh_token ? this.hashToken(refresh_token) : null,
                 expiresAt,
                 scopes
@@ -285,6 +320,25 @@ class GitHubService {
         } catch (error) {
             console.error('Get user repositories error:', error);
             throw new Error('Failed to get user repositories');
+        }
+    }
+
+    // Get decrypted access token for a user
+    async getAccessToken(userId) {
+        try {
+            const query = 'SELECT access_token_encrypted FROM github_accounts WHERE user_id = $1';
+            const result = await pool.query(query, [userId]);
+            if (result.rows.length === 0) {
+                throw new Error('GitHub account not found');
+            }
+            const enc = result.rows[0].access_token_encrypted;
+            if (!enc) {
+                throw new Error('GitHub token not stored yet. Please disconnect and reconnect.');
+            }
+            return decrypt(enc);
+        } catch (error) {
+            console.error('Get access token error:', error);
+            throw new Error('Failed to get access token');
         }
     }
 }
