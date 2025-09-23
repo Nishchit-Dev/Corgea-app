@@ -121,7 +121,10 @@ class GitHubService {
     // Get repository contents
     async getRepositoryContents(accessToken, owner, repo, path = '', ref = 'main') {
         try {
-            const url = `${this.baseURL}/repos/${owner}/${repo}/contents/${path}`;
+            const encodedPath = path
+                ? encodeURIComponent(path).replace(/%2F/g, '/')
+                : '';
+            const url = `${this.baseURL}/repos/${owner}/${repo}/contents/${encodedPath}`;
             const response = await axios.get(url, {
                 headers: {
                     'Authorization': `token ${accessToken}`,
@@ -140,9 +143,10 @@ class GitHubService {
     }
 
     // Get file content
-    async getFileContent(accessToken, owner, repo, path, ref = 'main') {
+    async getFileContent(accessToken, owner, repo, path, ref = 'main', sha = undefined) {
         try {
-            const url = `${this.baseURL}/repos/${owner}/${repo}/contents/${path}`;
+            const encodedPath = encodeURIComponent(path).replace(/%2F/g, '/');
+            const url = `${this.baseURL}/repos/${owner}/${repo}/contents/${encodedPath}`;
             const response = await axios.get(url, {
                 headers: {
                     'Authorization': `token ${accessToken}`,
@@ -153,13 +157,30 @@ class GitHubService {
                 }
             });
 
-            // Decode base64 content
-            const content = Buffer.from(response.data.content, 'base64').toString('utf-8');
-            return {
-                ...response.data,
-                content: content
-            };
+            if (response.data && response.data.content) {
+                const content = Buffer.from(response.data.content, 'base64').toString('utf-8');
+                return { ...response.data, content };
+            }
+            throw new Error('Not a file');
         } catch (error) {
+            // Fallback: use Git blob API if we have a SHA (works for large files and some edge cases)
+            if (sha) {
+                try {
+                    const blobUrl = `${this.baseURL}/repos/${owner}/${repo}/git/blobs/${sha}`;
+                    const blobResp = await axios.get(blobUrl, {
+                        headers: {
+                            'Authorization': `token ${accessToken}`,
+                            'Accept': 'application/vnd.github.v3+json'
+                        }
+                    });
+                    if (blobResp.data && blobResp.data.content) {
+                        const content = Buffer.from(blobResp.data.content, 'base64').toString('utf-8');
+                        return { path, content, encoding: 'utf-8', sha };
+                    }
+                } catch (blobErr) {
+                    console.error('GitHub blob fetch error:', blobErr);
+                }
+            }
             console.error('GitHub file content error:', error);
             throw new Error('Failed to get file content');
         }

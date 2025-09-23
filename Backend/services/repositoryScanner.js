@@ -208,7 +208,7 @@ class RepositoryScanner {
     async scanFile(accessToken, username, repoName, file, branch) {
         try {
             // Get file content
-            const fileContent = await githubService.getFileContent(accessToken, username, repoName, file.path, branch);
+            const fileContent = await githubService.getFileContent(accessToken, username, repoName, file.path, branch, file.sha);
             
             // Analyze code with AI
             const analysis = await analyzeCode(fileContent.content, file.path);
