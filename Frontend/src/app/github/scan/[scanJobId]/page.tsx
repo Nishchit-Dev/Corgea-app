@@ -31,11 +31,17 @@ type Vulnerability = {
     owaspCategory?: string | null
 }
 
+type FixSuggestion = {
+    line: string
+    suggestion: string
+}
+
 type ScanResult = {
     id?: number
     file_path: string
     file_content_hash?: string | null
     vulnerabilities?: Vulnerability[]
+    fixes?: FixSuggestion[]
     // flattened single row (fallback)
     title?: string
     description?: string
@@ -104,8 +110,8 @@ export default function ScanJobPage() {
     }
 
     const grouped = useMemo(() => {
-        if (!data?.results) return [] as Array<{ file: string; vulns: Vulnerability[] }>
-        const map = new Map<string, Vulnerability[]>()
+        if (!data?.results) return [] as Array<{ file: string; vulns: Vulnerability[]; fixes: FixSuggestion[] }>
+        const map = new Map<string, { vulns: Vulnerability[]; fixes: FixSuggestion[] }>()
         for (const r of data.results) {
             const file = r.file_path
             let vulns: Vulnerability[] = []
@@ -132,10 +138,13 @@ export default function ScanJobPage() {
                     owaspCategory: r.owasp_category ?? null,
                 }]
             }
-            if (!map.has(file)) map.set(file, [])
-            map.get(file)!.push(...vulns)
+            const fixes: FixSuggestion[] = Array.isArray(r.fixes) ? r.fixes.map(f => ({ line: String(f.line), suggestion: String(f.suggestion) })) : []
+            if (!map.has(file)) map.set(file, { vulns: [], fixes: [] })
+            const entry = map.get(file)!
+            entry.vulns.push(...vulns)
+            entry.fixes.push(...fixes)
         }
-        return Array.from(map.entries()).map(([file, vulns]) => ({ file, vulns }))
+        return Array.from(map.entries()).map(([file, { vulns, fixes }]) => ({ file, vulns, fixes }))
     }, [data])
 
     const severityClass = (s: Vulnerability['severity']) => {
@@ -325,7 +334,7 @@ export default function ScanJobPage() {
                                     </div>
                                 ) : (
                                     <div className="space-y-6">
-                                        {grouped.map(({ file, vulns }) => (
+                                        {grouped.map(({ file, vulns, fixes }) => (
                                             <Card key={file} className="overflow-hidden">
                                                 <CardHeader className="bg-gray-50 border-b">
                                                     <div className="flex items-center justify-between">
@@ -339,8 +348,30 @@ export default function ScanJobPage() {
                                                     </div>
                                                 </CardHeader>
                                                 <CardContent className="p-0">
-                                                    <div className="space-y-4 p-6">
-                                                        {vulns.map((v, i) => (
+                                                    <div className="space-y-6 p-6">
+                                                        {vulns.map((v, i) => {
+                                                            // Match fixes by overlapping line ranges with vulnerability lineNumber
+                                                            const parseRange = (rangeStr: string) => {
+                                                                const parts = String(rangeStr).split('-').map(p => parseInt(p.trim(), 10)).filter(n => !isNaN(n))
+                                                                if (parts.length === 0) return { start: NaN, end: NaN }
+                                                                if (parts.length === 1) return { start: parts[0], end: parts[0] }
+                                                                return { start: Math.min(parts[0], parts[1]), end: Math.max(parts[0], parts[1]) }
+                                                            }
+                                                            const matchedFixesRaw = (fixes || []).filter(f => {
+                                                                if (!v.lineNumber) return false
+                                                                const { start, end } = parseRange(f.line)
+                                                                if (isNaN(start) || isNaN(end)) return false
+                                                                return v.lineNumber! >= start && v.lineNumber! <= end
+                                                            })
+                                                            // Deduplicate identical suggestions (some rows can repeat per vulnerability)
+                                                            const seen = new Set<string>()
+                                                            const matchedFixes = matchedFixesRaw.filter(f => {
+                                                                const key = `${f.line}|${f.suggestion}`
+                                                                if (seen.has(key)) return false
+                                                                seen.add(key)
+                                                                return true
+                                                            })
+                                                            return (
                                                             <div key={i} className="border rounded-lg p-4 bg-white">
                                                                 <div className="flex items-start justify-between gap-4 mb-3">
                                                                     <div className="flex items-start gap-3 flex-1">
@@ -394,8 +425,25 @@ export default function ScanJobPage() {
                                                                         lineNumber={v.lineNumber || undefined}
                                                                     />
                                                                 )}
+
+                                                                {matchedFixes.length > 0 && (
+                                                                    <div className="ml-0 m-4 border-t p-3 bg-green-400/20 rounded-xl">
+                                                                        <div className="font-medium  text-gray-900 mb-2">Fixes</div>
+                                                                        <div className="space-y-2">
+                                                                            {matchedFixes.map((f, idx2) => (
+                                                                                <div key={idx2} className="flex items-start gap-3">
+                                                                                    <span className="text-xs px-2 py-1 rounded bg-gray-200 text-gray-800 whitespace-nowrap">Line {f.line}</span>
+                                                                                    <p className="text-sm text-gray-700 leading-relaxed">{f.suggestion}</p>
+                                                                                </div>
+                                                                            ))}
+                                                                        </div>
+                                                                    </div>
+                                                                )}
                                                             </div>
-                                                        ))}
+                                                            )
+                                                        })}
+
+                                                        
                                                     </div>
                                                 </CardContent>
                                             </Card>
