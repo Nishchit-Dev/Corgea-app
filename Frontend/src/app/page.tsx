@@ -82,29 +82,7 @@ function LandingPage() {
     }
 
     return (
-        <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
-            {/* Navigation */}
-            <nav className="bg-white/80 backdrop-blur-sm border-b border-gray-200 sticky top-0 z-50">
-                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                    <div className="flex justify-between items-center h-16">
-                        <div className="flex items-center space-x-2">
-                            <Shield className="h-8 w-8 text-blue-600" />
-                            <span className="text-xl font-bold text-gray-900">Corgea</span>
-                        </div>
-                        <div className="flex items-center space-x-4">
-                            <Link href="/github">
-                                <Button variant="outline" size="sm">
-                                    <Github className="h-4 w-4 mr-2" />
-                                    GitHub Integration
-                                </Button>
-                            </Link>
-                            <Button onClick={logout} variant="ghost" size="sm">
-                                Logout
-                            </Button>
-                        </div>
-                    </div>
-                </div>
-            </nav>
+        <div className="bg-gradient-to-br from-gray-50 to-gray-100">
 
             {/* Hero Section */}
             <section className="relative py-20 px-4 sm:px-6 lg:px-8">
@@ -298,71 +276,90 @@ function LandingPage() {
             {/* Stats Section */}
             <section className="py-20 px-4 sm:px-6 lg:px-8 bg-blue-600">
                 <div className="max-w-7xl mx-auto">
-                    <div className="grid grid-cols-1 md:grid-cols-4 gap-8 text-center text-white">
-                        <StatCard
-                            icon={<Shield className="h-8 w-8" />}
-                            number="1000+"
-                            label="Vulnerabilities Detected"
-                        />
-                        <StatCard
-                            icon={<Users className="h-8 w-8" />}
-                            number="500+"
-                            label="Developers Protected"
-                        />
-                        <StatCard
-                            icon={<Code className="h-8 w-8" />}
-                            number="50+"
-                            label="Languages Supported"
-                        />
-                        <StatCard
-                            icon={<Star className="h-8 w-8" />}
-                            number="99.9%"
-                            label="Accuracy Rate"
-                        />
+                    <motion.div 
+                        className="grid grid-cols-1 md:grid-cols-4 gap-8 text-center text-white"
+                        initial="initial"
+                        whileInView="animate"
+                        viewport={{ once: true }}
+                        variants={staggerContainer}
+                    >
+                        <motion.div variants={fadeInUp}>
+                            <StatCard
+                                icon={<Shield className="h-8 w-8" />}
+                                number="1000+"
+                                label="Vulnerabilities Detected"
+                            />
+                        </motion.div>
+                        <motion.div variants={fadeInUp}>
+                            <StatCard
+                                icon={<Users className="h-8 w-8" />}
+                                number="500+"
+                                label="Developers Protected"
+                            />
+                        </motion.div>
+                        <motion.div variants={fadeInUp}>
+                            <StatCard
+                                icon={<Code className="h-8 w-8" />}
+                                number="50+"
+                                label="Languages Supported"
+                            />
+                        </motion.div>
+                        <motion.div variants={fadeInUp}>
+                            <StatCard
+                                icon={<Star className="h-8 w-8" />}
+                                number="99.9%"
+                                label="Accuracy Rate"
+                            />
+                        </motion.div>
+                    </motion.div>
                     </div>
-                </div>
             </section>
 
             {/* CTA Section */}
             <section className="py-20 px-4 sm:px-6 lg:px-8 bg-white">
-                <div className="max-w-4xl mx-auto text-center">
+                <motion.div 
+                    className="max-w-4xl mx-auto text-center"
+                    initial="initial"
+                    whileInView="animate"
+                    viewport={{ once: true }}
+                    variants={fadeInUp}
+                >
                     <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-6">
                         Ready to Secure Your Code?
                     </h2>
                     <p className="text-xl text-gray-600 mb-8">
                         Join thousands of developers who trust Corgea to keep their code secure.
                     </p>
-                    <div className="flex flex-col sm:flex-row gap-4 justify-center">
+                    <motion.div 
+                        className="flex flex-col sm:flex-row gap-4 justify-center"
+                        variants={fadeInUp}
+                    >
                         <Link href="/github">
-                            <Button size="lg" className="w-full sm:w-auto">
-                                <Github className="h-5 w-5 mr-2" />
-                                Start Scanning Now
-                                <ArrowRight className="h-4 w-4 ml-2" />
+                            <motion.div
+                                whileHover={{ scale: 1.05 }}
+                                whileTap={{ scale: 0.95 }}
+                            >
+                                <Button size="lg" className="w-full sm:w-auto">
+                                    <Github className="h-5 w-5 mr-2" />
+                                    Start Scanning Now
+                                    <ArrowRight className="h-4 w-4 ml-2" />
                             </Button>
+                            </motion.div>
                         </Link>
-                        <Button variant="outline" size="lg" className="w-full sm:w-auto">
-                            <ExternalLink className="h-5 w-5 mr-2" />
-                            Learn More
+                        <motion.div
+                            whileHover={{ scale: 1.05 }}
+                            whileTap={{ scale: 0.95 }}
+                        >
+                            <Button variant="outline" size="lg" className="w-full sm:w-auto">
+                                <ExternalLink className="h-5 w-5 mr-2" />
+                                Learn More
                         </Button>
-                    </div>
-                </div>
+                        </motion.div>
+                    </motion.div>
+                </motion.div>
             </section>
 
-            {/* Footer */}
-            <footer className="bg-gray-900 text-white py-12 px-4 sm:px-6 lg:px-8">
-                <div className="max-w-7xl mx-auto">
-                    <div className="flex flex-col md:flex-row justify-between items-center">
-                        <div className="flex items-center space-x-2 mb-4 md:mb-0">
-                            <Shield className="h-6 w-6 text-blue-400" />
-                            <span className="text-lg font-bold">Corgea</span>
-                        </div>
-                        <div className="text-gray-400 text-sm">
-                            © 2024 Corgea. All rights reserved.
-                        </div>
-                    </div>
-                </div>
-            </footer>
-                            </div>
+        </div>
     )
 }
 
@@ -432,10 +429,35 @@ function StepCard({ step, icon, title, description }: { step: string; icon: Reac
 
 function StatCard({ icon, number, label }: { icon: React.ReactNode; number: string; label: string }) {
     return (
-        <div>
-            <div className="text-blue-200 mb-2">{icon}</div>
-            <div className="text-3xl font-bold mb-1">{number}</div>
+        <motion.div
+            whileHover={{ 
+                scale: 1.1,
+                transition: { duration: 0.2 }
+            }}
+        >
+            <motion.div 
+                className="text-blue-200 mb-2"
+                whileHover={{ 
+                    rotate: 360,
+                    transition: { duration: 0.6 }
+                }}
+            >
+                {icon}
+            </motion.div>
+            <motion.div 
+                className="text-3xl font-bold mb-1"
+                initial={{ scale: 0 }}
+                whileInView={{ scale: 1 }}
+                viewport={{ once: true }}
+                transition={{ 
+                    type: "spring", 
+                    stiffness: 200,
+                    delay: 0.2
+                }}
+            >
+                {number}
+            </motion.div>
             <div className="text-blue-200">{label}</div>
-        </div>
+        </motion.div>
     )
 }

@@ -224,14 +224,9 @@ function GitHubPageContent() {
         <div className="min-h-screen bg-gray-50 p-8">
             <div className="max-w-6xl mx-auto">
                 {/* Header */}
-                <div className="flex items-center justify-between mb-6">
+                <div className="flex  justify-between mb-6">
                     <div className="flex items-center gap-4">
-                        <Link href="/">
-                            <Button variant="outline" size="sm">
-                                <ArrowLeft className="h-4 w-4 mr-2" />
-                                Back to Scanner
-                            </Button>
-                        </Link>
+                        
                         <div>
                             <h1 className="text-3xl font-bold text-gray-900 flex items-center gap-2">
                                 <Github className="h-8 w-8" />
@@ -243,9 +238,7 @@ function GitHubPageContent() {
                             </p>
                         </div>
                     </div>
-                    <div className="text-sm text-gray-500">
-                        Welcome to GitHub Integration
-                    </div>
+                   
                 </div>
 
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
