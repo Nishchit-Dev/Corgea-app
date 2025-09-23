@@ -185,9 +185,21 @@ export default function ScanJobPage() {
 
         const allLines = (snippet || '').split('\n')
         const targetLine = vulnerability.lineNumber || null
-        const startLine = targetLine ? Math.max(1, targetLine - 8) : 1
-        const endLine = targetLine ? Math.min(allLines.length, targetLine + 8) : Math.min(allLines.length, 16)
-        const lines = allLines.slice(startLine - 1, endLine)
+        
+        // Calculate window around target line
+        let startLine = 1
+        let endLine = allLines.length
+        let lines = allLines
+        
+        if (targetLine) {
+            startLine = Math.max(1, targetLine - 8)
+            endLine = Math.min(allLines.length, targetLine + 8)
+            lines = allLines.slice(startLine - 1, endLine)
+        } else if (allLines.length > 16) {
+            // If no target line, show first 16 lines
+            lines = allLines.slice(0, 16)
+            endLine = 16
+        }
 
         return (
             <div className="mt-3 border rounded-lg overflow-hidden">
@@ -195,14 +207,14 @@ export default function ScanJobPage() {
                     <Code className="h-4 w-4" />
                     Code Snippet
                     {targetLine && (
-                        <span className="text-xs bg-gray-700 px-2 py-1 rounded">
+                        <span className="text-xs bg-gray-700 text-white px-2 py-1 rounded">
                             Line {targetLine}
                         </span>
                     )}
                 </div>
                 <div className="text-gray-800 bg-gray-200 font-mono text-sm overflow-x-auto">
                     {lines.map((line, index) => {
-                        const lineNum = (startLine + index)
+                        const lineNum = startLine + index
                         const isHighlighted = !!(targetLine && lineNum === targetLine)
                         
                         return (
@@ -221,7 +233,7 @@ export default function ScanJobPage() {
                                     {line}
                                 </div>
                                 {isHighlighted && (
-                                    <div className="w-2 bg-red-500"></div>
+                                    <div className="w-2 bg-red-500/40"></div>
                                 )}
                             </div>
                         )
@@ -446,9 +458,21 @@ function CodeFetcher({ scanJobId, filePath, lineNumber }: { scanJobId: string; f
     // Compute window around target line
     const allLines = snippet.split('\n')
     const target = lineNumber || null
-    const start = target ? Math.max(1, target - 8) : 1
-    const end = target ? Math.min(allLines.length, target + 8) : Math.min(allLines.length, 16)
-    const lines = allLines.slice(start - 1, end)
+    
+    // Calculate window around target line
+    let start = 1
+    let end = allLines.length
+    let lines = allLines
+    
+    if (target) {
+        start = Math.max(1, target - 8)
+        end = Math.min(allLines.length, target + 8)
+        lines = allLines.slice(start - 1, end)
+    } else if (allLines.length > 16) {
+        // If no target line, show first 16 lines
+        lines = allLines.slice(0, 16)
+        end = 16
+    }
 
     return (
         <div className="mt-3 border rounded-lg overflow-hidden">
@@ -459,13 +483,13 @@ function CodeFetcher({ scanJobId, filePath, lineNumber }: { scanJobId: string; f
                     <span className="text-xs bg-gray-700 text-white px-2 py-1 rounded">Line {target}</span>
                 )}
             </div>
-            <div className=" font-mono text-sm overflow-x-auto">
+            <div className="text-gray-800 bg-gray-200 font-mono text-sm overflow-x-auto">
                 {lines.map((line, index) => {
                     const lineNum = start + index
                     const isHighlighted = !!(target && lineNum === target)
                     return (
-                        <div key={index} className={`flex ${isHighlighted ? 'bg-red-900/30 border-l-4 border-red-500' : 'hover:bg-gray-800/50'}`}>
-                            <div className="w-12 px-3 py-1 text-xs text-gray-500 bg-gray-800 border-r border-gray-700 select-none">{lineNum}</div>
+                        <div key={index} className={`flex ${isHighlighted ? 'bg-red-900/30 border-l-4 border-red-500' : 'hover:bg-gray-200/50'}`}>
+                            <div className="w-12 px-3 py-1 text-xs bg-gray-600 text-gray-200 border-r border-gray-700 select-none">{lineNum}</div>
                             <div className="flex-1 px-3 py-1 whitespace-pre-wrap">{line}</div>
                             {isHighlighted && (<div className="w-2 bg-red-500/40"></div>)}
                         </div>
