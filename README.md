@@ -48,6 +48,11 @@
 - **Code Highlighting** - Precise vulnerability marking
 - **Fix Suggestions** - Actionable recommendations
 
+### **Developer**
+- **Created by**: [Nishchit Kumar Malasana](https://github.com/Nishchit-Dev)
+- **Portfolio**: [nishchit.dev](https://nishchit.dev)
+- **Contact**: [NishchitKumarMalasana@gmail.com](mailto:NishchitKumarMalasana@gmail.com)
+
 ---
 
 ## ✨ Features
@@ -491,18 +496,32 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ---
 
-## 📞 Support
+## 📞 Support & Contact
 
-- 📧 **Email**: support@AISecure.dev
-- 🐛 **Issues**: [GitHub Issues](https://github.com/yourusername/AISecure/issues)
-- 💬 **Discussions**: [GitHub Discussions](https://github.com/yourusername/AISecure/discussions)
+### **Developer Contact**
+- 📧 **Email**: [NishchitKumarMalasana@gmail.com](mailto:NishchitKumarMalasana@gmail.com)
+- 🐙 **GitHub**: [@Nishchit-Dev](https://github.com/Nishchit-Dev)
+- 💼 **LinkedIn**: [Nishchit Kumar Malasana](https://linkedin.com/in/nishchit)
+- 🐦 **Twitter**: [@NishchitDev](https://x.com/0xNishchit)
+- 🌐 **Portfolio**: [nishchit.dev](https://nishchit.vercel.app)
+
+### **Project Support**
+- 🐛 **Issues**: [GitHub Issues](https://github.com/Nishchit-Dev/AI-Secure/issues)
+- 💬 **Discussions**: [GitHub Discussions](https://github.com/Nishchit-Dev/AI-Secure/discussions)
 
 ---
 
 <div align="center">
 
-**Made with ❤️ by the AISecure Team**
+**Made with ❤️ by [Nishchit Kumar Malasana](https://github.com/Nishchit-Dev)**
 
-[⭐ Star this repo](https://github.com/yourusername/AISecure) • [🐛 Report Bug](https://github.com/yourusername/AISecure/issues) • [💡 Request Feature](https://github.com/yourusername/AISecure/issues)
+[⭐ Star this repo](https://github.com/Nishchit-Dev/AI-Secure) • [🐛 Report Bug](https://github.com/Nishchit-Dev/AI-Secure/issues) • [💡 Request Feature](https://github.com/Nishchit-Dev/AI-Secure/issues)
+
+### **Connect with the Developer**
+[![GitHub](https://img.shields.io/badge/GitHub-@Nishchit--Dev-black?style=flat-square&logo=github)](https://github.com/Nishchit-Dev)
+[![LinkedIn](https://img.shields.io/badge/LinkedIn-Nishchit%20Kumar%20Malasana-blue?style=flat-square&logo=linkedin)](https://linkedin.com/in/nishchit)
+[![Twitter](https://img.shields.io/badge/Twitter-@NishchitDev-blue?style=flat-square&logo=twitter)](https://x.com/0xNishchit)
+[![Portfolio](https://img.shields.io/badge/Portfolio-nishchit.dev-green?style=flat-square&logo=globe)](https://nishchit.vercel.app)
+[![Email](https://img.shields.io/badge/Email-NishchitKumarMalasana@gmail.com-red?style=flat-square&logo=gmail)](mailto:NishchitKumarMalasana@gmail.com)
 
 </div>
