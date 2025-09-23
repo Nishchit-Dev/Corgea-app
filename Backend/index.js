@@ -3,6 +3,7 @@ const express = require('express');
 const bodyParser = require('body-parser');
 const cors = require('cors');
 const pool = require('./config/database');
+const DatabaseInitializer = require('./lib/database-init');
 
 const app = express();
 app.use(cors());
@@ -10,9 +11,11 @@ app.use(bodyParser.json({ limit: '1mb' }));
 
 // Import routes
 const authRoutes = require('./routes/auth');
+const githubRoutes = require('./routes/github');
 
 // Use routes
 app.use('/api/auth', authRoutes);
+app.use('/api/github', githubRoutes);
 
 
 /**
@@ -60,6 +63,56 @@ Make results concise and focused.
  * /scan endpoint
  * Body: { code: string, filename?: string }
  */
+app.post('/api/scan', async (req, res) => {
+    try {
+        const { code, filename = 'code.js' } = req.body;
+        
+        if (!code) {
+            return res.status(400).json({ error: 'Code is required' });
+        }
 
-const port = process.env.PORT || 4000;
-app.listen(port, () => console.log(`Corgea-lite backend listening on ${port}`));
+        // Use the AI service to analyze code
+        const { analyzeCode } = require('./lib/ai');
+        const result = await analyzeCode(code, filename);
+        
+        res.json(result);
+    } catch (error) {
+        console.error('Scan error:', error);
+        res.status(500).json({ error: 'Failed to analyze code' });
+    }
+});
+
+// Initialize database and start server
+async function startServer() {
+    try {
+        // Initialize database
+        const dbInit = new DatabaseInitializer();
+        const dbReady = await dbInit.initialize();
+        
+        if (!dbReady) {
+            console.error('❌ Failed to initialize database. Server will not start.');
+            process.exit(1);
+        }
+        
+        // Clean up database initialization connections
+        await dbInit.cleanup();
+        
+        // Start the server
+        const port = process.env.PORT || 4000;
+        app.listen(port, () => {
+            console.log(`🚀 Corgea-lite backend listening on port ${port}`);
+            console.log(`📊 Database: corgea_auth`);
+            console.log(`🔗 API endpoints:`);
+            console.log(`   - Auth: http://localhost:${port}/api/auth`);
+            console.log(`   - GitHub: http://localhost:${port}/api/github`);
+            console.log(`   - Scan: http://localhost:${port}/api/scan`);
+        });
+        
+    } catch (error) {
+        console.error('❌ Failed to start server:', error.message);
+        process.exit(1);
+    }
+}
+
+// Start the server
+startServer();

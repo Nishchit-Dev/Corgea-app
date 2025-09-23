@@ -3,7 +3,7 @@ import { Geist, Geist_Mono, JetBrains_Mono } from "next/font/google";
 import "./globals.css";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
-import App from "./App";
+
 
 const jetbrains = JetBrains_Mono({
   variable: "--font-jetbrains-mono",
@@ -27,7 +27,7 @@ export default function RootLayout({
       >
         <ErrorBoundary>
           <AuthProvider>
-            <App />
+            {children}
           </AuthProvider>
         </ErrorBoundary>
       </body>

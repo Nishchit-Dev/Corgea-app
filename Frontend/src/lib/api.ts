@@ -110,6 +110,18 @@ class ApiService {
       body: JSON.stringify({ code, filename }),
     });
   }
+
+  // Convenience helpers
+  async get<T>(endpoint: string): Promise<T> {
+    return this.request<T>(endpoint, { method: 'GET' });
+  }
+
+  async post<T>(endpoint: string, body?: unknown): Promise<T> {
+    return this.request<T>(endpoint, {
+      method: 'POST',
+      body: body !== undefined ? JSON.stringify(body) : undefined,
+    });
+  }
 }
 
 export const apiService = new ApiService(API_BASE_URL);

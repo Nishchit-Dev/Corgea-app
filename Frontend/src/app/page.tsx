@@ -1,13 +1,42 @@
 'use client'
 import { useState } from 'react'
 import { useAuth } from '@/contexts/AuthContext'
-import { apiService } from '@/lib/api'
+import { apiService} from '../lib/api'
 import CodeInput from './components/CodeInputEditor'
 import ResultCard from './components/ResultCard'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { Github, Shield } from 'lucide-react'
+import Link from 'next/link'
+import ProtectedRoute from '@/components/auth/ProtectedRoute'
+import AuthPage from './auth/page'
 
 export default function Home() {
+    const { user, loading } = useAuth();
+
+    if (loading) {
+        return (
+            <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+                <div className="text-center">
+                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-4"></div>
+                    <p>Loading...</p>
+                </div>
+            </div>
+        );
+    }
+
+    if (!user) {
+        return <AuthPage />;
+    }
+
+    return (
+        <ProtectedRoute>
+            <HomeContent />
+        </ProtectedRoute>
+    );
+}
+
+function HomeContent() {
     const [code, setCode] = useState(`app.post("/purchase", (req, res) => {
     const { userId, productId, price } = req.body;
     db.purchase(userId, productId, price); // trusting client input
@@ -43,13 +72,21 @@ export default function Home() {
                             Welcome back, {user?.firstName || user?.email}!
                         </p>
                     </div>
-                    <Button 
-                        onClick={logout}
-                        variant="outline"
-                        className="text-sm"
-                    >
-                        Logout
-                    </Button>
+                    <div className="flex items-center gap-3">
+                        <Link href="/github">
+                            <Button variant="outline" className="text-sm">
+                                <Github className="h-4 w-4 mr-2" />
+                                GitHub Integration
+                            </Button>
+                        </Link>
+                        <Button 
+                            onClick={logout}
+                            variant="outline"
+                            className="text-sm"
+                        >
+                            Logout
+                        </Button>
+                    </div>
                 </div>
 
                 <Card>
