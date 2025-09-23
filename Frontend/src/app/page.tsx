@@ -4,6 +4,7 @@ import { useAuth } from '@/contexts/AuthContext'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
+import { motion } from 'framer-motion'
 import { 
     Github, 
     Shield, 
@@ -47,6 +48,39 @@ export default function Home() {
 function LandingPage() {
     const { user, logout } = useAuth()
 
+    // Animation variants
+    const fadeInUp = {
+        initial: { opacity: 0, y: 60 },
+        animate: { opacity: 1, y: 0 },
+        transition: { duration: 0.6 }
+    }
+
+    const fadeInLeft = {
+        initial: { opacity: 0, x: -60 },
+        animate: { opacity: 1, x: 0 },
+        transition: { duration: 0.6 }
+    }
+
+    const fadeInRight = {
+        initial: { opacity: 0, x: 60 },
+        animate: { opacity: 1, x: 0 },
+        transition: { duration: 0.6 }
+    }
+
+    const staggerContainer = {
+        animate: {
+            transition: {
+                staggerChildren: 0.1
+            }
+        }
+    }
+
+    const scaleIn = {
+        initial: { opacity: 0, scale: 0.8 },
+        animate: { opacity: 1, scale: 1 },
+        transition: { duration: 0.5 }
+    }
+
     return (
         <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
             {/* Navigation */}
@@ -75,116 +109,189 @@ function LandingPage() {
             {/* Hero Section */}
             <section className="relative py-20 px-4 sm:px-6 lg:px-8">
                 <div className="max-w-7xl mx-auto">
-                    <div className="text-center">
-                        <Badge variant="secondary" className="mb-4 px-3 py-1">
-                            <Zap className="h-3 w-3 mr-1" />
-                            AI-Powered Security Scanning
-                        </Badge>
-                        <h1 className="text-4xl md:text-6xl font-bold text-gray-900 mb-6">
+                    <motion.div 
+                        className="text-center"
+                        initial="initial"
+                        animate="animate"
+                        variants={staggerContainer}
+                    >
+                        <motion.div variants={fadeInUp}>
+                            <Badge variant="secondary" className="mb-4 px-3 py-1">
+                                <Zap className="h-3 w-3 mr-1" />
+                                AI-Powered Security Scanning
+                            </Badge>
+                        </motion.div>
+                        <motion.h1 
+                            className="text-4xl md:text-6xl font-bold text-gray-900 mb-6"
+                            variants={fadeInUp}
+                        >
                             Secure Your Code with
-                            <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-purple-600">
+                            <motion.span 
+                                className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-purple-600"
+                                initial={{ opacity: 0, scale: 0.8 }}
+                                animate={{ opacity: 1, scale: 1 }}
+                                transition={{ delay: 0.3, duration: 0.8 }}
+                            >
                                 {' '}AI Intelligence
-                            </span>
-                        </h1>
-                        <p className="text-xl text-gray-600 mb-8 max-w-3xl mx-auto">
+                            </motion.span>
+                        </motion.h1>
+                        <motion.p 
+                            className="text-xl text-gray-600 mb-8 max-w-3xl mx-auto"
+                            variants={fadeInUp}
+                        >
                             Automatically detect vulnerabilities, security flaws, and code issues across your entire GitHub repository with advanced AI analysis.
-                        </p>
-                        <div className="flex flex-col sm:flex-row gap-4 justify-center">
+                        </motion.p>
+                        <motion.div 
+                            className="flex flex-col sm:flex-row gap-4 justify-center"
+                            variants={fadeInUp}
+                        >
                             <Link href="/github">
-                                <Button size="lg" className="w-full sm:w-auto">
-                                    <Github className="h-5 w-5 mr-2" />
-                                    Connect GitHub Repository
-                                    <ArrowRight className="h-4 w-4 ml-2" />
-                                </Button>
+                                <motion.div
+                                    whileHover={{ scale: 1.05 }}
+                                    whileTap={{ scale: 0.95 }}
+                                >
+                                    <Button size="lg" className="w-full sm:w-auto">
+                                        <Github className="h-5 w-5 mr-2" />
+                                        Connect GitHub Repository
+                                        <ArrowRight className="h-4 w-4 ml-2" />
+                                    </Button>
+                                </motion.div>
                             </Link>
-                            <Button variant="outline" size="lg" className="w-full sm:w-auto">
-                                <Eye className="h-5 w-5 mr-2" />
-                                View Demo
-                            </Button>
-                        </div>
-                    </div>
+                            <motion.div
+                                whileHover={{ scale: 1.05 }}
+                                whileTap={{ scale: 0.95 }}
+                            >
+                                <Button variant="outline" size="lg" className="w-full sm:w-auto">
+                                    <Eye className="h-5 w-5 mr-2" />
+                                    View Demo
+                                </Button>
+                            </motion.div>
+                        </motion.div>
+                    </motion.div>
                 </div>
             </section>
 
             {/* Features Section */}
             <section className="py-20 px-4 sm:px-6 lg:px-8 bg-white">
                 <div className="max-w-7xl mx-auto">
-                    <div className="text-center mb-16">
+                    <motion.div 
+                        className="text-center mb-16"
+                        initial="initial"
+                        whileInView="animate"
+                        viewport={{ once: true }}
+                        variants={fadeInUp}
+                    >
                         <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
                             Why Choose Corgea?
                         </h2>
                         <p className="text-xl text-gray-600 max-w-2xl mx-auto">
                             Advanced security scanning powered by cutting-edge AI technology
                         </p>
-                    </div>
+                    </motion.div>
 
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                        <FeatureCard
-                            icon={<Shield className="h-8 w-8" />}
-                            title="Comprehensive Security Analysis"
-                            description="Detect SQL injection, XSS, authentication bypasses, and hundreds of other security vulnerabilities automatically."
-                        />
-                        <FeatureCard
-                            icon={<Code className="h-8 w-8" />}
-                            title="Multi-Language Support"
-                            description="Scan JavaScript, TypeScript, Python, Java, C#, and more with intelligent code analysis."
-                        />
-                        <FeatureCard
-                            icon={<Zap className="h-8 w-8" />}
-                            title="Real-Time Scanning"
-                            description="Get instant results with our high-performance AI engine that scans entire repositories in seconds."
-                        />
-                        <FeatureCard
-                            icon={<Eye className="h-8 w-8" />}
-                            title="Detailed Code Highlighting"
-                            description="See exactly where vulnerabilities exist with precise line-by-line highlighting and context."
-                        />
-                        <FeatureCard
-                            icon={<FileText className="h-8 w-8" />}
-                            title="Actionable Fix Suggestions"
-                            description="Get specific, detailed recommendations on how to fix each vulnerability with code examples."
-                        />
-                        <FeatureCard
-                            icon={<Lock className="h-8 w-8" />}
-                            title="Secure & Private"
-                            description="Your code stays secure. We use encrypted connections and never store your source code permanently."
-                        />
-                    </div>
+                    <motion.div 
+                        className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8"
+                        initial="initial"
+                        whileInView="animate"
+                        viewport={{ once: true }}
+                        variants={staggerContainer}
+                    >
+                        <motion.div variants={fadeInUp}>
+                            <FeatureCard
+                                icon={<Shield className="h-8 w-8" />}
+                                title="Comprehensive Security Analysis"
+                                description="Detect SQL injection, XSS, authentication bypasses, and hundreds of other security vulnerabilities automatically."
+                            />
+                        </motion.div>
+                        <motion.div variants={fadeInUp}>
+                            <FeatureCard
+                                icon={<Code className="h-8 w-8" />}
+                                title="Multi-Language Support"
+                                description="Scan JavaScript, TypeScript, Python, Java, C#, and more with intelligent code analysis."
+                            />
+                        </motion.div>
+                        <motion.div variants={fadeInUp}>
+                            <FeatureCard
+                                icon={<Zap className="h-8 w-8" />}
+                                title="Real-Time Scanning"
+                                description="Get instant results with our high-performance AI engine that scans entire repositories in seconds."
+                            />
+                        </motion.div>
+                        <motion.div variants={fadeInUp}>
+                            <FeatureCard
+                                icon={<Eye className="h-8 w-8" />}
+                                title="Detailed Code Highlighting"
+                                description="See exactly where vulnerabilities exist with precise line-by-line highlighting and context."
+                            />
+                        </motion.div>
+                        <motion.div variants={fadeInUp}>
+                            <FeatureCard
+                                icon={<FileText className="h-8 w-8" />}
+                                title="Actionable Fix Suggestions"
+                                description="Get specific, detailed recommendations on how to fix each vulnerability with code examples."
+                            />
+                        </motion.div>
+                        <motion.div variants={fadeInUp}>
+                            <FeatureCard
+                                icon={<Lock className="h-8 w-8" />}
+                                title="Secure & Private"
+                                description="Your code stays secure. We use encrypted connections and never store your source code permanently."
+                            />
+                        </motion.div>
+                    </motion.div>
                 </div>
             </section>
 
             {/* How It Works Section */}
             <section className="py-20 px-4 sm:px-6 lg:px-8 bg-gray-50">
                 <div className="max-w-7xl mx-auto">
-                    <div className="text-center mb-16">
+                    <motion.div 
+                        className="text-center mb-16"
+                        initial="initial"
+                        whileInView="animate"
+                        viewport={{ once: true }}
+                        variants={fadeInUp}
+                    >
                         <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
                             How It Works
                         </h2>
                         <p className="text-xl text-gray-600">
                             Get started in minutes with our simple 3-step process
                         </p>
-                    </div>
+                    </motion.div>
 
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-                        <StepCard
-                            step="1"
-                            icon={<Github className="h-8 w-8" />}
-                            title="Connect Your Repository"
-                            description="Securely connect your GitHub account and select the repositories you want to scan."
-                        />
-                        <StepCard
-                            step="2"
-                            icon={<Search className="h-8 w-8" />}
-                            title="AI Analysis"
-                            description="Our advanced AI engine analyzes your code for security vulnerabilities and potential issues."
-                        />
-                        <StepCard
-                            step="3"
-                            icon={<AlertTriangle className="h-8 w-8" />}
-                            title="Review & Fix"
-                            description="Review detailed reports with highlighted vulnerabilities and actionable fix suggestions."
-                        />
-                    </div>
+                    <motion.div 
+                        className="grid grid-cols-1 md:grid-cols-3 gap-8"
+                        initial="initial"
+                        whileInView="animate"
+                        viewport={{ once: true }}
+                        variants={staggerContainer}
+                    >
+                        <motion.div variants={fadeInLeft}>
+                            <StepCard
+                                step="1"
+                                icon={<Github className="h-8 w-8" />}
+                                title="Connect Your Repository"
+                                description="Securely connect your GitHub account and select the repositories you want to scan."
+                            />
+                        </motion.div>
+                        <motion.div variants={fadeInUp}>
+                            <StepCard
+                                step="2"
+                                icon={<Search className="h-8 w-8" />}
+                                title="AI Analysis"
+                                description="Our advanced AI engine analyzes your code for security vulnerabilities and potential issues."
+                            />
+                        </motion.div>
+                        <motion.div variants={fadeInRight}>
+                            <StepCard
+                                step="3"
+                                icon={<AlertTriangle className="h-8 w-8" />}
+                                title="Review & Fix"
+                                description="Review detailed reports with highlighted vulnerabilities and actionable fix suggestions."
+                            />
+                        </motion.div>
+                    </motion.div>
                 </div>
             </section>
 
@@ -255,36 +362,71 @@ function LandingPage() {
                     </div>
                 </div>
             </footer>
-        </div>
+                            </div>
     )
 }
 
 function FeatureCard({ icon, title, description }: { icon: React.ReactNode; title: string; description: string }) {
     return (
-        <Card className="h-full hover:shadow-lg transition-shadow duration-300">
-            <CardContent className="p-6">
-                <div className="text-blue-600 mb-4">{icon}</div>
-                <h3 className="text-xl font-semibold text-gray-900 mb-3">{title}</h3>
-                <p className="text-gray-600">{description}</p>
-            </CardContent>
-        </Card>
+        <motion.div
+            whileHover={{ 
+                y: -10,
+                transition: { duration: 0.2 }
+            }}
+            whileTap={{ scale: 0.98 }}
+        >
+            <Card className="h-full hover:shadow-xl transition-all duration-300 cursor-pointer">
+                <CardContent className="p-6">
+                    <motion.div 
+                        className="text-blue-600 mb-4"
+                        whileHover={{ 
+                            scale: 1.1,
+                            rotate: 5,
+                            transition: { duration: 0.2 }
+                        }}
+                    >
+                        {icon}
+                    </motion.div>
+                    <h3 className="text-xl font-semibold text-gray-900 mb-3">{title}</h3>
+                    <p className="text-gray-600">{description}</p>
+                    </CardContent>
+                </Card>
+        </motion.div>
     )
 }
 
 function StepCard({ step, icon, title, description }: { step: string; icon: React.ReactNode; title: string; description: string }) {
     return (
-        <div className="text-center">
+        <motion.div 
+            className="text-center"
+            whileHover={{ 
+                scale: 1.05,
+                transition: { duration: 0.2 }
+            }}
+        >
             <div className="relative">
-                <div className="w-16 h-16 bg-blue-600 text-white rounded-full flex items-center justify-center mx-auto mb-4">
+                <motion.div 
+                    className="w-16 h-16 bg-blue-600 text-white rounded-full flex items-center justify-center mx-auto mb-4"
+                    whileHover={{ 
+                        scale: 1.1,
+                        rotate: 360,
+                        transition: { duration: 0.6 }
+                    }}
+                >
                     {icon}
-                </div>
-                <div className="absolute -top-2 -right-2 w-8 h-8 bg-blue-500 text-white rounded-full flex items-center justify-center text-sm font-bold">
+                </motion.div>
+                <motion.div 
+                    className="absolute -top-2 -right-2 w-8 h-8 bg-blue-500 text-white rounded-full flex items-center justify-center text-sm font-bold"
+                    initial={{ scale: 0 }}
+                    animate={{ scale: 1 }}
+                    transition={{ delay: 0.5, type: "spring", stiffness: 200 }}
+                >
                     {step}
-                </div>
+                </motion.div>
             </div>
             <h3 className="text-xl font-semibold text-gray-900 mb-3">{title}</h3>
             <p className="text-gray-600">{description}</p>
-        </div>
+        </motion.div>
     )
 }
 
