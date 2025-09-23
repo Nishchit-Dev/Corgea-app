@@ -38,7 +38,9 @@ Respond ONLY with valid JSON (no surrounding text, no markdown code blocks) with
       "title": "Short descriptive title",
       "description": "Detailed explanation of the issue and where it is in the code (line/context).",
       "severity": "Critical|High|Medium|Low",
-      "line": "line number or range"
+      "line": "line number or range",
+      "startingLine:"line number",
+      "endingLine:"line number"
     }
   ],
   "fixes": [

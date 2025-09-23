@@ -26,10 +26,14 @@ type Vulnerability = {
     severity: 'critical' | 'high' | 'medium' | 'low' | 'info'
     category: string
     lineNumber?: number | null
+    startingLine?: number | null
+    endingLine?: number | null
     codeSnippet?: string
     cweId?: string | null
     owaspCategory?: string | null
 }
+
+type HighlightRange = { start: number; end: number }
 
 type FixSuggestion = {
     line: string
@@ -48,6 +52,8 @@ type ScanResult = {
     severity?: Vulnerability['severity']
     category?: string
     line_number?: number | null
+    starting_line?: number | null
+    ending_line?: number | null
     code_snippet?: string
     cwe_id?: string | null
     owasp_category?: string | null
@@ -122,6 +128,8 @@ export default function ScanJobPage() {
                     severity: v.severity as Vulnerability['severity'],
                     category: v.category,
                     lineNumber: v.lineNumber ?? null,
+                    startingLine: v.startingLine ?? null,
+                    endingLine: v.endingLine ?? null,
                     codeSnippet: v.codeSnippet,
                     cweId: v.cweId ?? null,
                     owaspCategory: v.owaspCategory ?? null,
@@ -133,6 +141,8 @@ export default function ScanJobPage() {
                     severity: r.severity,
                     category: r.category || 'general',
                     lineNumber: r.line_number ?? null,
+                    startingLine: r.starting_line ?? null,
+                    endingLine: r.ending_line ?? null,
                     codeSnippet: r.code_snippet,
                     cweId: r.cwe_id ?? null,
                     owaspCategory: r.owasp_category ?? null,
@@ -177,80 +187,7 @@ export default function ScanJobPage() {
         }
     }
 
-    const renderCodeWithHighlight = (vulnerability: Vulnerability) => {
-        const [snippet, setSnippet] = useState<string | null>(vulnerability.codeSnippet || null)
-
-        useEffect(() => {
-            let cancelled = false
-            const maybeFetch = async () => {
-                if (snippet || !data?.scanJob || vulnerability.codeSnippet) return
-                try {
-                    // We don't know the file path at this layer; the parent maps group by file, so this is safe to skip here.
-                } catch {}
-            }
-            maybeFetch()
-            return () => { cancelled = true }
-        }, [snippet, data?.scanJob, vulnerability.codeSnippet])
-
-        const allLines = (snippet || '').split('\n')
-        const targetLine = vulnerability.lineNumber || null
-        
-        // Calculate window around target line
-        let startLine = 1
-        let endLine = allLines.length
-        let lines = allLines
-        
-        if (targetLine) {
-            startLine = Math.max(1, targetLine - 8)
-            endLine = Math.min(allLines.length, targetLine + 8)
-            lines = allLines.slice(startLine - 1, endLine)
-        } else if (allLines.length > 16) {
-            // If no target line, show first 16 lines
-            lines = allLines.slice(0, 16)
-            endLine = 16
-        }
-
-        return (
-            <div className="mt-3 border rounded-lg overflow-hidden">
-                <div className="text-gray-800 bg-gray-200 px-4 py-2 text-sm font-medium flex items-center gap-2">
-                    <Code className="h-4 w-4" />
-                    Code Snippet
-                    {targetLine && (
-                        <span className="text-xs bg-gray-700 text-white px-2 py-1 rounded">
-                            Line {targetLine}
-                        </span>
-                    )}
-                </div>
-                <div className="text-gray-800 bg-gray-200 font-mono text-sm overflow-x-auto">
-                    {lines.map((line, index) => {
-                        const lineNum = startLine + index
-                        const isHighlighted = !!(targetLine && lineNum === targetLine)
-                        
-                        return (
-                            <div
-                                key={index}
-                                className={`flex ${
-                                    isHighlighted 
-                                        ? 'bg-red-900/30 border-l-4 border-red-500' 
-                                        : 'hover:bg-gray-200/50'
-                                }`}
-                            >
-                                <div className="w-12 px-3 py-1 text-xs bg-gray-200 text-gray-800 border-r border-gray-700 select-none">
-                                    {lineNum}
-                                </div>
-                                <div className="flex-1 px-3 py-1 whitespace-pre-wrap">
-                                    {line}
-                                </div>
-                                {isHighlighted && (
-                                    <div className="w-2 bg-red-500/40"></div>
-                                )}
-                            </div>
-                        )
-                    })}
-                </div>
-            </div>
-        )
-    }
+    // Removed hook-usage from non-component helper; we now use components below
 
     return (
         <div className="min-h-screen bg-gray-50 p-8">
@@ -372,74 +309,14 @@ export default function ScanJobPage() {
                                                                 return true
                                                             })
                                                             return (
-                                                            <div key={i} className="border rounded-lg p-4 bg-white">
-                                                                <div className="flex items-start justify-between gap-4 mb-3">
-                                                                    <div className="flex items-start gap-3 flex-1">
-                                                                        {severityIcon(v.severity)}
-                                                                        <div className="flex-1">
-                                                                            <div className="font-medium text-gray-900 mb-1">
-                                                                                {v.title}
-                                                                            </div>
-                                                                            <div className="flex items-center gap-2 text-sm text-gray-600 mb-2">
-                                                                                <span className="px-2 py-1 bg-gray-100 rounded text-xs">
-                                                                                    {v.category}
-                                                                                </span>
-                                                                                {v.cweId && (
-                                                                                    <span className="px-2 py-1 bg-blue-100 text-blue-800 rounded text-xs">
-                                                                                        {v.cweId}
-                                                                                    </span>
-                                                                                )}
-                                                                                {v.owaspCategory && (
-                                                                                    <span className="px-2 py-1 bg-purple-100 text-purple-800 rounded text-xs">
-                                                                                        {v.owaspCategory}
-                                                                                    </span>
-                                                                                )}
-                                                                                {v.lineNumber && (
-                                                                                    <span className="px-2 py-1 bg-gray-100 rounded text-xs">
-                                                                                        Line {v.lineNumber}
-                                                                                    </span>
-                                                                                )}
-                                                                            </div>
-                                                                        </div>
-                                                                    </div>
-                                                                    <span className={`text-xs px-3 py-1 rounded-full font-medium ${severityClass(v.severity)}`}>
-                                                                        {v.severity.toUpperCase()}
-                                                                    </span>
-                                                                </div>
-                                                                
-                                                                {v.description && (
-                                                                    <div className="mb-4">
-                                                                        <p className="text-sm text-gray-700 leading-relaxed">
-                                                                            {v.description}
-                                                                        </p>
-                                                                    </div>
-                                                                )}
-
-                                                                {/* If snippet missing, fetch it from backend using scan id and file path */}
-                                                                {v.codeSnippet ? (
-                                                                    renderCodeWithHighlight(v)
-                                                                ) : (
-                                                                    <CodeFetcher
-                                                                        scanJobId={String(data.scanJob.id)}
-                                                                        filePath={file}
-                                                                        lineNumber={v.lineNumber || undefined}
-                                                                    />
-                                                                )}
-
-                                                                {matchedFixes.length > 0 && (
-                                                                    <div className="ml-0 m-4 border-t p-3 bg-green-400/20 rounded-xl">
-                                                                        <div className="font-medium  text-gray-900 mb-2">Fixes</div>
-                                                                        <div className="space-y-2">
-                                                                            {matchedFixes.map((f, idx2) => (
-                                                                                <div key={idx2} className="flex items-start gap-3">
-                                                                                    <span className="text-xs px-2 py-1 rounded bg-gray-200 text-gray-800 whitespace-nowrap">Line {f.line}</span>
-                                                                                    <p className="text-sm text-gray-700 leading-relaxed">{f.suggestion}</p>
-                                                                                </div>
-                                                                            ))}
-                                                                        </div>
-                                                                    </div>
-                                                                )}
-                                                            </div>
+                                                                <VulnerabilityItem
+                                                                    key={i}
+                                                                    file={file}
+                                                                    scanJobId={String(data.scanJob.id)}
+                                                                    vulnerability={v}
+                                                                    fixes={matchedFixes}
+                                                                    severityBadgeClass={severityClass(v.severity)}
+                                                                />
                                                             )
                                                         })}
 
@@ -546,6 +423,251 @@ function CodeFetcher({ scanJobId, filePath, lineNumber }: { scanJobId: string; f
             </div>
         </div>
     )
+}
+
+
+function FixItem({ lineRange, suggestion, onHighlight }: { lineRange: string; suggestion: string; onHighlight?: (start: number, end: number) => void }) {
+    const parseRange = (rangeStr: string) => {
+        const parts = String(rangeStr).split('-').map(p => parseInt(p.trim(), 10)).filter(n => !isNaN(n))
+        if (parts.length === 0) return { start: NaN, end: NaN }
+        if (parts.length === 1) return { start: parts[0], end: parts[0] }
+        return { start: Math.min(parts[0], parts[1]), end: Math.max(parts[0], parts[1]) }
+    }
+
+    const { start, end } = parseRange(lineRange)
+    const label = isNaN(start) ? 'Line' : `Line ${start}${end !== start ? `-${end}` : ''}`
+
+    return (
+        <div className="flex items-start gap-3">
+            <button
+                type="button"
+                className="text-xs px-2 py-1 rounded bg-gray-200 text-gray-800 whitespace-nowrap hover:bg-gray-300"
+                onClick={() => {
+                    if (!isNaN(start) && !isNaN(end) && onHighlight) onHighlight(start, end)
+                }}
+            >
+                {label}
+            </button>
+            <p className="text-sm text-gray-700 leading-relaxed">{suggestion}</p>
+        </div>
+    )
+}
+
+function VulnerabilityItem({ file, scanJobId, vulnerability, fixes, severityBadgeClass }: {
+    file: string
+    scanJobId: string
+    vulnerability: Vulnerability
+    fixes: FixSuggestion[]
+    severityBadgeClass: string
+}) {
+    const [highlight, setHighlight] = useState<HighlightRange | null>(null)
+    
+    const iconForSeverity = (s: Vulnerability['severity']) => {
+        switch (s) {
+            case 'critical':
+                return <XCircle className="h-4 w-4 text-red-600" />
+            case 'high':
+                return <AlertTriangle className="h-4 w-4 text-orange-500" />
+            case 'medium':
+                return <ShieldAlert className="h-4 w-4 text-yellow-500" />
+            case 'low':
+                return <AlertTriangle className="h-4 w-4 text-blue-500" />
+            default:
+                return <ShieldAlert className="h-4 w-4 text-gray-500" />
+        }
+    }
+
+    const getDefaultRange = (vuln: Vulnerability, fixList: FixSuggestion[]): HighlightRange | null => {
+        // First try to get range from vulnerability's startingLine/endingLine (from AI)
+        if (vuln.startingLine && vuln.endingLine) {
+            return { start: vuln.startingLine, end: vuln.endingLine }
+        }
+        // Then try to get range from fixes (multi-line)
+        if (fixList && fixList.length > 0) {
+            const firstFix = fixList[0]
+            const { start, end } = parseRange(firstFix.line)
+            if (!isNaN(start) && !isNaN(end)) {
+                return { start, end }
+            }
+        }
+        // Fallback to single line from vulnerability
+        if (vuln.lineNumber) {
+            return { start: vuln.lineNumber, end: vuln.lineNumber }
+        }
+        return null
+    }
+
+    const parseRange = (rangeStr: string) => {
+        const parts = String(rangeStr).split('-').map(p => parseInt(p.trim(), 10)).filter(n => !isNaN(n))
+        if (parts.length === 0) return { start: NaN, end: NaN }
+        if (parts.length === 1) return { start: parts[0], end: parts[0] }
+        return { start: Math.min(parts[0], parts[1]), end: Math.max(parts[0], parts[1]) }
+    }
+
+    return (
+        <div className="border rounded-lg p-4 bg-white">
+            <div className="flex items-start justify-between gap-4 mb-3">
+                <div className="flex items-start gap-3 flex-1">
+                    {iconForSeverity(vulnerability.severity)}
+                    <div className="flex-1">
+                        <div className="font-medium text-gray-900 mb-1">
+                            {vulnerability.title}
+                        </div>
+                        <div className="flex items-center gap-2 text-sm text-gray-600 mb-2">
+                            <span className="px-2 py-1 bg-gray-100 rounded text-xs">
+                                {vulnerability.category}
+                            </span>
+                            {vulnerability.cweId && (
+                                <span className="px-2 py-1 bg-blue-100 text-blue-800 rounded text-xs">
+                                    {vulnerability.cweId}
+                                </span>
+                            )}
+                            {vulnerability.owaspCategory && (
+                                <span className="px-2 py-1 bg-purple-100 text-purple-800 rounded text-xs">
+                                    {vulnerability.owaspCategory}
+                                </span>
+                            )}
+                            {(vulnerability.startingLine && vulnerability.endingLine) ? (
+                                <span className="px-2 py-1 bg-gray-100 rounded text-xs">
+                                    Line {vulnerability.startingLine}-{vulnerability.endingLine}
+                                </span>
+                            ) : vulnerability.lineNumber && (
+                                <span className="px-2 py-1 bg-gray-100 rounded text-xs">
+                                    Line {vulnerability.lineNumber}
+                                </span>
+                            )}
+                        </div>
+                    </div>
+                </div>
+                <span className={`text-xs px-3 py-1 rounded-full font-medium ${severityBadgeClass}`}>
+                    {vulnerability.severity.toUpperCase()}
+                </span>
+            </div>
+
+            {vulnerability.description && (
+                <div className="mb-4">
+                    <p className="text-sm text-gray-700 leading-relaxed">
+                        {vulnerability.description}
+                    </p>
+                </div>
+            )}
+
+            {/* Render code snippet with chosen highlight range */}
+            {vulnerability.codeSnippet ? (
+                <CodeSnippet code={vulnerability.codeSnippet} range={highlight || getDefaultRange(vulnerability, fixes)} />
+            ) : (
+                <CodeFetcherWithRange
+                    scanJobId={scanJobId}
+                    filePath={file}
+                    range={highlight || getDefaultRange(vulnerability, fixes)}
+                />
+            )}
+
+            {fixes && fixes.length > 0 && (
+                <div className="ml-0 m-4 border-t p-3 bg-green-400/20 rounded-xl">
+                    <div className="font-medium  text-gray-900 mb-2">Fixes</div>
+                    <div className="space-y-2">
+                        {fixes.map((f, idx2) => {
+                            const { start, end } = parseRange(f.line)
+                            return (
+                                <div key={idx2} className="flex items-start gap-3">
+                                    <button
+                                        type="button"
+                                        className="text-xs px-2 py-1 rounded bg-gray-200 text-gray-800 whitespace-nowrap hover:bg-gray-300"
+                                        onClick={() => { if (!isNaN(start) && !isNaN(end)) setHighlight({ start, end }) }}
+                                    >
+                                        Line {isNaN(start) ? '' : start}{!isNaN(end) && end !== start ? `-${end}` : ''}
+                                    </button>
+                                    <p className="text-sm text-gray-700 leading-relaxed">{f.suggestion}</p>
+                                </div>
+                            )
+                        })}
+                    </div>
+                </div>
+            )}
+        </div>
+    )
+}
+
+function CodeSnippet({ code, range }: { code: string; range: HighlightRange | null }) {
+    const allLines = (code || '').split('\n')
+    const rangeStart = range?.start || null
+    const rangeEnd = range?.end || null
+
+    // Calculate window around range
+    let startLine = 1
+    let endLine = allLines.length
+    let lines = allLines
+
+    if (rangeStart && rangeEnd) {
+        startLine = Math.max(1, rangeStart - 8)
+        endLine = Math.min(allLines.length, rangeEnd + 8)
+        lines = allLines.slice(startLine - 1, endLine)
+    } else if (allLines.length > 16) {
+        lines = allLines.slice(0, 16)
+        endLine = 16
+    }
+
+    return (
+        <div className="mt-3 border rounded-lg overflow-hidden">
+            <div className="text-gray-800 bg-gray-200 px-4 py-2 text-sm font-medium flex items-center gap-2">
+                <Code className="h-4 w-4" />
+                Code Snippet
+                {(rangeStart && rangeEnd) && (
+                    <span className="text-xs bg-gray-700 text-white px-2 py-1 rounded">
+                        Line {rangeStart}{rangeEnd !== rangeStart ? `-${rangeEnd}` : ''}
+                    </span>
+                )}
+            </div>
+            <div className="text-gray-800 bg-gray-200 font-mono text-sm overflow-x-auto">
+                {lines.map((line, index) => {
+                    const lineNum = startLine + index
+                    const isHighlighted = !!(rangeStart && rangeEnd && lineNum >= rangeStart && lineNum <= rangeEnd)
+                    return (
+                        <div key={index} className={`flex ${isHighlighted ? 'bg-red-900/30 border-l-4 border-red-500' : 'hover:bg-gray-200/50'}`}>
+                            <div className="w-12 px-3 py-1 text-xs bg-gray-600 text-gray-200 border-r border-gray-700 select-none">{lineNum}</div>
+                            <div className="flex-1 px-3 py-1 whitespace-pre-wrap">{line}</div>
+                            {isHighlighted && (<div className="w-2 bg-red-500/40"></div>)}
+                        </div>
+                    )
+                })}
+            </div>
+        </div>
+    )
+}
+
+function CodeFetcherWithRange({ scanJobId, filePath, range }: { scanJobId: string; filePath: string; range: HighlightRange | null }) {
+    const [snippet, setSnippet] = useState<string | null>(null)
+    const [error, setError] = useState<string | null>(null)
+
+    useEffect(() => {
+        let cancelled = false
+        const fetchCode = async () => {
+            try {
+                const resp = await apiService.get<{ content: string }>(`/api/github/scan/${scanJobId}/file?path=${encodeURIComponent(filePath)}`)
+                if (cancelled) return
+                setSnippet(resp.content)
+            } catch (err: any) {
+                if (cancelled) return
+                setError(err?.message || 'Failed to load code')
+            }
+        }
+        fetchCode()
+        return () => { cancelled = true }
+    }, [scanJobId, filePath])
+
+    if (error) {
+        return <div className="mt-3 text-xs text-red-600">{error}</div>
+    }
+    if (!snippet) {
+        return (
+            <div className="mt-3 flex items-center gap-2 text-sm text-gray-600">
+                <Loader2 className="h-4 w-4 animate-spin" />
+                <span>Loading code…</span>
+            </div>
+        )
+    }
+    return <CodeSnippet code={snippet} range={range} />
 }
 
 
