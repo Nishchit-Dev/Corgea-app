@@ -1,4 +1,4 @@
-# Corgea Backend - User Authentication
+# AISecure Backend - User Authentication
 
 A Node.js backend with PostgreSQL database for user authentication and code scanning.
 
@@ -22,7 +22,7 @@ npm install
 
 #### Install PostgreSQL
 - Download and install PostgreSQL from https://www.postgresql.org/download/
-- Create a database named `corgea_auth`
+- Create a database named `AISecure_auth`
 - Note your database credentials
 
 #### Environment Variables
@@ -31,7 +31,7 @@ Create a `.env` file in the backend directory:
 # Database Configuration
 DB_HOST=localhost
 DB_PORT=5432
-DB_NAME=corgea_auth
+DB_NAME=AISecure_auth
 DB_USER=postgres
 DB_PASSWORD=your_password_here
 

@@ -43,7 +43,7 @@ async function testConnection() {
         console.log('\n💡 Please check:');
         console.log('   1. PostgreSQL is running');
         console.log('   2. Database credentials in .env file');
-        console.log('   3. Database "corgea_auth" exists');
+        console.log('   3. Database "aisecure_auth" exists');
         return false;
     }
 }

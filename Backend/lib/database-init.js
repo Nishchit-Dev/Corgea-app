@@ -104,7 +104,7 @@ class DatabaseInitializer {
 
         try {
             console.log('📝 Creating database...');
-            await this.setupPool.query('CREATE DATABASE corgea_auth');
+            await this.setupPool.query('CREATE DATABASE aisecure_auth');
             console.log('✅ Database created successfully');
         } catch (error) {
             if (error.code === '42P04') {
@@ -119,7 +119,7 @@ class DatabaseInitializer {
         this.appPool = new Pool({
             host: process.env.DB_HOST || 'localhost',
             port: process.env.DB_PORT || 5432,
-            database: 'corgea_auth',
+            database: 'aisecure_auth',
             user: process.env.DB_USER || 'postgres',
             password: password,
         });

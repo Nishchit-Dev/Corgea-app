@@ -1,9 +1,9 @@
 @echo off
-echo Setting up Corgea database...
+echo Setting up AISecure database...
 
 echo.
 echo Step 1: Creating database...
-psql -U postgres -c "CREATE DATABASE corgea_auth;" 2>nul
+psql -U postgres -c "CREATE DATABASE AISecure_auth;" 2>nul
 if %errorlevel% equ 0 (
     echo ✅ Database created successfully
 ) else (
@@ -12,7 +12,7 @@ if %errorlevel% equ 0 (
 
 echo.
 echo Step 2: Creating tables...
-psql -U postgres -d corgea_auth -f "database\schema.sql"
+psql -U postgres -d AISecure_auth -f "database\schema.sql"
 if %errorlevel% equ 0 (
     echo ✅ Basic tables created successfully
 ) else (
@@ -21,7 +21,7 @@ if %errorlevel% equ 0 (
 
 echo.
 echo Step 3: Creating GitHub integration tables...
-psql -U postgres -d corgea_auth -f "database\github-schema.sql"
+psql -U postgres -d AISecure_auth -f "database\github-schema.sql"
 if %errorlevel% equ 0 (
     echo ✅ GitHub tables created successfully
 ) else (

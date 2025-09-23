@@ -29,11 +29,11 @@ async function setupCompleteDatabase() {
         // Step 1: Create the database if it doesn't exist
         console.log('\n📝 Creating database...');
         try {
-            await client.query('CREATE DATABASE corgea_auth');
-            console.log('✅ Database "corgea_auth" created successfully');
+            await client.query('CREATE DATABASE aisecure_auth');
+            console.log('✅ Database "aisecure_auth" created successfully');
         } catch (error) {
             if (error.code === '42P04') {
-                console.log('⚠️  Database "corgea_auth" already exists, continuing...');
+                console.log('⚠️  Database "aisecure_auth" already exists, continuing...');
             } else {
                 throw error;
             }
@@ -44,12 +44,12 @@ async function setupCompleteDatabase() {
         // Step 2: Connect to the new database
         const appDbConfig = {
             ...dbConfig,
-            database: 'corgea_auth'
+            database: 'aisecure_auth'
         };
         
         const appPool = new Pool(appDbConfig);
         const appClient = await appPool.connect();
-        console.log('✅ Connected to corgea_auth database');
+        console.log('✅ Connected to aisecure_auth database');
         
         // Step 3: Create basic tables
         console.log('\n📝 Creating basic tables...');
@@ -216,7 +216,7 @@ async function setupCompleteDatabase() {
         await appPool.end();
         
         console.log('\n🎉 Complete database setup successful!');
-        console.log('✅ Database: corgea_auth');
+        console.log('✅ Database: aisecure_auth');
         console.log('✅ Basic tables: users, user_sessions');
         console.log('✅ GitHub tables: github_accounts, github_repositories, scan_jobs, vulnerabilities, vulnerability_fixes, scan_history, user_preferences');
         console.log('\n🚀 You can now start the backend server!');

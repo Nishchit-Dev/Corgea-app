@@ -18,7 +18,7 @@ async function testPassword(password) {
     const pool = new Pool({
         user: 'postgres',
         host: 'localhost',
-        database: 'corgea_auth',
+        database: 'aisecure_auth',
         password: password,
         port: 5432,
     });

@@ -1,8 +1,8 @@
--- Create the corgea_auth database
-CREATE DATABASE corgea_auth;
+-- Create the aisecure_auth database
+CREATE DATABASE aisecure_auth;
 
 -- Connect to the new database
-\c corgea_auth;
+\c aisecure_auth;
 
 -- Create users table
 CREATE TABLE IF NOT EXISTS users (
@@ -30,4 +30,4 @@ CREATE INDEX IF NOT EXISTS idx_sessions_user_id ON user_sessions(user_id);
 CREATE INDEX IF NOT EXISTS idx_sessions_expires_at ON user_sessions(expires_at);
 
 -- Show success message
-SELECT 'Database corgea_auth created successfully!' as message;
+SELECT 'Database aisecure_auth created successfully!' as message;

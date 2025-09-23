@@ -1,5 +1,5 @@
 @echo off
-echo 🔧 Corgea Database Setup
+echo 🔧 AISecure Database Setup
 echo ========================
 echo.
 

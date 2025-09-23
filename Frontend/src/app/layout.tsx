@@ -11,12 +11,12 @@ const jetbrains = JetBrains_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Corgea AI Scanner",
+  title: "AISecure AI Scanner",
   description: "AI-powered code security scanner for GitHub repositories",
   keywords: ["AI", "security", "code scanner", "GitHub", "vulnerability detection"],
-  authors: [{ name: "Corgea Team" }],
+  authors: [{ name: "AISecure Team" }],
   openGraph: {
-    title: "Corgea AI Scanner",
+    title: "AISecure AI Scanner",
     description: "AI-powered code security scanner for GitHub repositories",
     type: "website",
   },

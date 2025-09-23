@@ -1,8 +1,8 @@
-# 🛡️ Corgea - AI-Powered Code Security Scanner
+# 🛡️ AISecure - AI-Powered Code Security Scanner
 
 <div align="center">
 
-![Corgea Logo](https://img.shields.io/badge/Corgea-AI%20Security%20Scanner-blue?style=for-the-badge&logo=shield&logoColor=white)
+![AISecure Logo](https://img.shields.io/badge/AISecure-AI%20Security%20Scanner-blue?style=for-the-badge&logo=shield&logoColor=white)
 
 [![Next.js](https://img.shields.io/badge/Next.js-15.5.3-black?style=flat-square&logo=next.js)](https://nextjs.org/)
 [![Node.js](https://img.shields.io/badge/Node.js-Express-green?style=flat-square&logo=node.js)](https://nodejs.org/)
@@ -106,7 +106,7 @@ graph TB
 # Backend (.env)
 DB_HOST=localhost
 DB_PORT=5432
-DB_NAME=corgea_auth
+DB_NAME=AISecure_auth
 DB_USER=postgres
 DB_PASSWORD=your_password
 JWT_SECRET=your-secret-key
@@ -123,8 +123,8 @@ NEXT_PUBLIC_API_URL=http://localhost:4000
 
 ### **1. Clone the Repository**
 ```bash
-git clone https://github.com/yourusername/corgea.git
-cd corgea
+git clone https://github.com/yourusername/AISecure.git
+cd AISecure
 ```
 
 ### **2. Backend Setup**
@@ -145,7 +145,7 @@ npm run dev
 ### **4. Database Setup**
 ```sql
 -- Create database
-CREATE DATABASE corgea_auth;
+CREATE DATABASE AISecure_auth;
 
 -- Tables will be created automatically by the init script
 ```
@@ -231,7 +231,7 @@ const scanResult = await fetch('/scan', {
 ## 🏗️ Project Structure
 
 ```
-corgea/
+AISecure/
 ├── 📁 Backend/                 # Express.js API server
 │   ├── 📁 config/             # Database configuration
 │   ├── 📁 controllers/        # Route controllers
@@ -388,16 +388,16 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ## 📞 Support
 
-- 📧 **Email**: support@corgea.dev
-- 🐛 **Issues**: [GitHub Issues](https://github.com/yourusername/corgea/issues)
-- 💬 **Discussions**: [GitHub Discussions](https://github.com/yourusername/corgea/discussions)
+- 📧 **Email**: support@AISecure.dev
+- 🐛 **Issues**: [GitHub Issues](https://github.com/yourusername/AISecure/issues)
+- 💬 **Discussions**: [GitHub Discussions](https://github.com/yourusername/AISecure/discussions)
 
 ---
 
 <div align="center">
 
-**Made with ❤️ by the Corgea Team**
+**Made with ❤️ by the AISecure Team**
 
-[⭐ Star this repo](https://github.com/yourusername/corgea) • [🐛 Report Bug](https://github.com/yourusername/corgea/issues) • [💡 Request Feature](https://github.com/yourusername/corgea/issues)
+[⭐ Star this repo](https://github.com/yourusername/AISecure) • [🐛 Report Bug](https://github.com/yourusername/AISecure/issues) • [💡 Request Feature](https://github.com/yourusername/AISecure/issues)
 
 </div>

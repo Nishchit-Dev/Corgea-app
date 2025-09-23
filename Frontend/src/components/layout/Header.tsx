@@ -44,7 +44,7 @@ export default function Header() {
                         </motion.div>
                         <div className="flex flex-col">
                             <span className="text-xl font-bold text-gray-900 group-hover:text-blue-600 transition-colors">
-                                Corgea
+                                AISecure
                             </span>
                             <Badge variant="secondary" className="text-xs px-1 py-0 w-fit">
                                 AI Security

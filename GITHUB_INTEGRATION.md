@@ -2,7 +2,7 @@
 
 ## 🏗️ **System Overview**
 
-This document outlines the complete GitHub integration for Corgea, enabling users to scan their repositories for security vulnerabilities.
+This document outlines the complete GitHub integration for AISecure, enabling users to scan their repositories for security vulnerabilities.
 
 ## 📊 **Database Schema**
 
@@ -227,5 +227,5 @@ NEXT_PUBLIC_API_URL=http://localhost:4000
 - Deployment instructions
 - Troubleshooting guides
 
-This integration transforms Corgea from a simple code scanner into a comprehensive repository security platform! 🚀
+This integration transforms AISecure from a simple code scanner into a comprehensive repository security platform! 🚀
 

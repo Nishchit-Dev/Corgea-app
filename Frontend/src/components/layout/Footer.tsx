@@ -78,7 +78,7 @@ export default function Footer() {
                                 </motion.div>
                                 <div className="flex flex-col">
                                     <span className="text-xl font-bold group-hover:text-blue-400 transition-colors">
-                                        Corgea
+                                        AISecure
                                     </span>
                                     <span className="text-sm text-gray-400">AI Security Scanner</span>
                                 </div>
@@ -109,40 +109,7 @@ export default function Footer() {
                     </div>
 
                     {/* Links Sections */}
-                    <div className="lg:col-span-4 grid grid-cols-2 md:grid-cols-4 gap-8">
-                        {Object.entries(footerLinks).map(([category, links], categoryIndex) => (
-                            <motion.div
-                                key={category}
-                                initial={{ opacity: 0, y: 20 }}
-                                whileInView={{ opacity: 1, y: 0 }}
-                                viewport={{ once: true }}
-                                transition={{ delay: categoryIndex * 0.1 }}
-                            >
-                                <h3 className="text-sm font-semibold text-white uppercase tracking-wider mb-4">
-                                    {category}
-                                </h3>
-                                <ul className="space-y-3">
-                                    {links.map((link, linkIndex) => (
-                                        <motion.li
-                                            key={link.name}
-                                            initial={{ opacity: 0, x: -10 }}
-                                            whileInView={{ opacity: 1, x: 0 }}
-                                            viewport={{ once: true }}
-                                            transition={{ delay: (categoryIndex * 0.1) + (linkIndex * 0.05) }}
-                                        >
-                                            <Link
-                                                href={link.href}
-                                                className="text-gray-400 hover:text-blue-400 transition-colors duration-200 flex items-center group"
-                                            >
-                                                {link.name}
-                                                <ExternalLink className="h-3 w-3 ml-1 opacity-0 group-hover:opacity-100 transition-opacity" />
-                                            </Link>
-                                        </motion.li>
-                                    ))}
-                                </ul>
-                            </motion.div>
-                        ))}
-                    </div>
+                    
                 </div>
 
                 {/* Social Links */}
@@ -174,7 +141,7 @@ export default function Footer() {
                         </div>
                         
                         <div className="text-sm text-gray-400">
-                            © {currentYear} Corgea. All rights reserved.
+                            © {currentYear} AISecure. All rights reserved.
                         </div>
                     </div>
                 </motion.div>

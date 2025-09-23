@@ -1,4 +1,4 @@
-# Corgea Frontend - AI Code Security Scanner
+# AISecure Frontend - AI Code Security Scanner
 
 A modern React/Next.js frontend application with user authentication and AI-powered code security scanning.
 

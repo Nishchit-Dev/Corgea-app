@@ -44,7 +44,7 @@ async function testConnection() {
         } else if (error.code === 'ECONNREFUSED') {
             console.log('💡 Hint: Make sure PostgreSQL is running');
         } else if (error.code === '3D000') {
-            console.log('💡 Hint: Database "corgea_auth" does not exist. Run the setup script first.');
+            console.log('💡 Hint: Database "aisecure_auth" does not exist. Run the setup script first.');
         }
         
         return false;

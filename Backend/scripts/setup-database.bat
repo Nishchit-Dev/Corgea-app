@@ -1,5 +1,5 @@
 @echo off
-echo Setting up Corgea database...
+echo Setting up AISecure database...
 echo.
 
 REM Check if psql is available
@@ -11,7 +11,7 @@ if %ERRORLEVEL% NEQ 0 (
     echo 1. Open pgAdmin
     echo 2. Right-click on "Databases"
     echo 3. Select "Create" - "Database"
-    echo 4. Name it: corgea_auth
+    echo 4. Name it: AISecure_auth
     echo 5. Click "Save"
     echo.
     pause

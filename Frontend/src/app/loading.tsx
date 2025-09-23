@@ -24,7 +24,7 @@ export default function Loading() {
                     animate={{ opacity: 1 }}
                     transition={{ delay: 0.2 }}
                 >
-                    Loading Corgea...
+                    Loading AISecure...
                 </motion.h2>
                 <motion.p
                     className="text-gray-600"

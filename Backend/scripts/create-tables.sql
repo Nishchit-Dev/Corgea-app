@@ -1,5 +1,5 @@
--- Connect to corgea_auth database and create tables
-\c corgea_auth;
+-- Connect to aisecure_auth database and create tables
+\c aisecure_auth;
 
 -- Create users table
 CREATE TABLE IF NOT EXISTS users (

@@ -37,7 +37,7 @@ async function createEnvFile() {
         const envContent = `# Database Configuration
 DB_HOST=localhost
 DB_PORT=5432
-DB_NAME=corgea_auth
+DB_NAME=aisecure_auth
 DB_USER=postgres
 DB_PASSWORD=${dbPassword}
 

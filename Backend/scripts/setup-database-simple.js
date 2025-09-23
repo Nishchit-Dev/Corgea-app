@@ -47,12 +47,12 @@ async function setupDatabase(password) {
     });
     
     try {
-        console.log('🔧 Setting up Corgea database...');
+        console.log('🔧 Setting up AISecure database...');
         
         // Step 1: Create database
         console.log('📝 Creating database...');
         try {
-            await setupPool.query('CREATE DATABASE corgea_auth');
+            await setupPool.query('CREATE DATABASE AISecure_auth');
             console.log('✅ Database created successfully');
         } catch (error) {
             if (error.code === '42P04') {
@@ -63,11 +63,11 @@ async function setupDatabase(password) {
         }
         
         // Step 2: Connect to the new database
-        console.log('🔗 Connecting to corgea_auth database...');
+        console.log('🔗 Connecting to AISecure_auth database...');
         const appPool = new Pool({
             host: 'localhost',
             port: 5432,
-            database: 'corgea_auth',
+            database: 'AISecure_auth',
             user: 'postgres',
             password: password,
         });

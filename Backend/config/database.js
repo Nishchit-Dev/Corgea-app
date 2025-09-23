@@ -4,7 +4,7 @@ const { env } = require('../scripts/env')
 const dbConfig = {
     user: env.DB_USER,
     host: env.DB_HOST || 'localhost',
-    database: env.DB_NAME || 'corgea_auth',
+    database: env.DB_NAME || 'aisecure_auth',
     password: env.DB_PASSWORD || 'RaTHACKER@84',
     port: parseInt(env.DB_PORT) || 5432,
     // Connection pool settings

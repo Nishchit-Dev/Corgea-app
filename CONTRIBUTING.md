@@ -1,6 +1,6 @@
-# 🤝 Contributing to Corgea
+# 🤝 Contributing to AISecure
 
-Thank you for your interest in contributing to Corgea! This document provides guidelines and information for contributors.
+Thank you for your interest in contributing to AISecure! This document provides guidelines and information for contributors.
 
 ## 📋 Table of Contents
 
@@ -27,8 +27,8 @@ This project adheres to a code of conduct that we expect all contributors to fol
 1. Fork the repository on GitHub
 2. Clone your fork locally:
    ```bash
-   git clone https://github.com/yourusername/corgea.git
-   cd corgea
+   git clone https://github.com/yourusername/AISecure.git
+   cd AISecure
    ```
 
 ## 🛠️ Development Setup
@@ -51,7 +51,7 @@ Create the necessary environment files:
 ```env
 DB_HOST=localhost
 DB_PORT=5432
-DB_NAME=corgea_auth
+DB_NAME=AISecure_auth
 DB_USER=postgres
 DB_PASSWORD=your_password
 JWT_SECRET=your-secret-key
@@ -268,4 +268,4 @@ Contributors will be recognized in:
 - Release notes
 - Project documentation
 
-Thank you for contributing to Corgea! 🚀
+Thank you for contributing to AISecure! 🚀

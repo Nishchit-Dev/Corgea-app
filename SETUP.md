@@ -1,6 +1,6 @@
-# Corgea Setup Guide
+# AISecure Setup Guide
 
-This guide will help you set up the Corgea AI Code Security Scanner with proper error handling.
+This guide will help you set up the AISecure AI Code Security Scanner with proper error handling.
 
 ## 🚀 Quick Start
 
@@ -13,9 +13,9 @@ This guide will help you set up the Corgea AI Code Security Scanner with proper 
 
 #### Create Database
 1. Open pgAdmin or psql command line
-2. Create a new database named `corgea_auth`:
+2. Create a new database named `AISecure_auth`:
    ```sql
-   CREATE DATABASE corgea_auth;
+   CREATE DATABASE AISecure_auth;
    ```
 
 #### Set Environment Variables
@@ -24,7 +24,7 @@ Create a `.env` file in the `Backend` directory:
 # Database Configuration
 DB_HOST=localhost
 DB_PORT=5432
-DB_NAME=corgea_auth
+DB_NAME=AISecure_auth
 DB_USER=postgres
 DB_PASSWORD=your_postgres_password_here
 
@@ -126,7 +126,7 @@ Visit: `http://localhost:3000` (should show login form)
 ```env
 DB_HOST=localhost          # PostgreSQL host
 DB_PORT=5432              # PostgreSQL port
-DB_NAME=corgea_auth       # Database name
+DB_NAME=AISecure_auth       # Database name
 DB_USER=postgres          # Database user
 DB_PASSWORD=your_password # Database password
 JWT_SECRET=your_secret    # JWT signing secret
